@@ -1,3 +1,0 @@
-C:/Users/kevin/CLionProjects/puzzle_solvers/cmake-build-debug/CMakeFiles/puzzle_solvers.dir
-C:/Users/kevin/CLionProjects/puzzle_solvers/cmake-build-debug/CMakeFiles/edit_cache.dir
-C:/Users/kevin/CLionProjects/puzzle_solvers/cmake-build-debug/CMakeFiles/rebuild_cache.dir
