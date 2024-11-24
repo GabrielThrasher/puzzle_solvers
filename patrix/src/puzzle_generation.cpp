@@ -11,7 +11,6 @@ void PuzzleGeneration::generatePuzzle() {
         }
         puzzle.push_back(puzzleRow);
     }
-    cout << "Top Edge: " << puzzle[101][128].edges["topEdge"] << " | Bottom Edge: " << puzzle[100][128].edges["bottomEdge"] << endl;
 }
 
 void PuzzleGeneration::generatePiece(int row, int col) {
