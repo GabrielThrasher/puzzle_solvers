@@ -148,7 +148,7 @@ void PuzzleGeneration::updatePuzzleStorageMaps(int col) {
     bottomEdges[piece.edges[bottomEdgeName]].insert(piece);
     rightEdges[piece.edges[rightEdgeName]].insert(piece);
 
-    // Add the 4 color maps updates here with the *exact same* logIC to that above
+    // Add the 4 color maps updates here with the *exact same* logic to that above
     // CODE HERE
 }
 
