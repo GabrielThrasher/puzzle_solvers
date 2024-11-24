@@ -1,16 +1,24 @@
 #include <puzzle_generation.h>
 
 void PuzzleGeneration::generatePuzzle() {
+    cout << "PUZZLE GENERATION" << endl;
+    cout << "-------------------------------------" << endl;
+    cout << "Starting puzzle generation..." << std::endl;
     for (int i = 0; i < rows; i++) {
         puzzleRow = {};
 
         for (int j = 0; j < cols; j++) {
-            PuzzlePiece peice(i, j);
-            puzzleRow.push_back(peice);
+            PuzzlePiece piece(i, j);
+            puzzleRow.push_back(piece);
             generatePiece(i, j);
+            // put add color function here
+            updatePuzzleStorageMaps(j);
         }
         puzzle.push_back(puzzleRow);
     }
+    cout << "Finsihed puzzle generation." << endl;
+    cout << "-------------------------------------" << endl;
+    printPuzzleStorageMapsSize();
 }
 
 void PuzzleGeneration::generatePiece(int row, int col) {
@@ -82,7 +90,7 @@ void PuzzleGeneration::generatePiece(int row, int col) {
 }
 
 int PuzzleGeneration::getEdge() {
-    string octalStr = "";
+    string octalStr;
     random_device rd;
     unsigned long seed = rd();
     mt19937 engine(seed);
@@ -101,10 +109,12 @@ int PuzzleGeneration::getEdge() {
     return octalNum;
 }
 
-int PuzzleGeneration::getUniqueEdge(unordered_map<int, PuzzlePiece>* map) {
+int PuzzleGeneration::getUniqueEdge(unordered_map<int, unordered_set<PuzzlePiece>>* map) {
     int edge = getEdge();
     auto iter = map->find(edge);
-    while (iter != map->end()) {
+    // Keep generating a new edge octal value for as long as it is already being used in an same-side edge OR is the
+    // same as the flat edge value
+    while (iter != map->end() || edge == flatEdge) {
         edge = getEdge();
         iter = map->find(edge);
     }
@@ -128,4 +138,50 @@ int PuzzleGeneration::getComplementEdge(int num) {
     }
 
     return stoi(comp);
+}
+
+void PuzzleGeneration::updatePuzzleStorageMaps(int col) {
+    PuzzlePiece& piece = puzzleRow[col];
+
+    topEdges[piece.edges[topEdgeName]].insert(piece);
+    leftEdges[piece.edges[leftEdgeName]].insert(piece);
+    bottomEdges[piece.edges[bottomEdgeName]].insert(piece);
+    rightEdges[piece.edges[rightEdgeName]].insert(piece);
+
+    // Add the 4 color maps updates here with the *exact same* logIC to that above
+    // CODE HERE
+}
+
+void PuzzleGeneration::printPuzzleStorageMapsSize() {
+    // Dev fcn to verify that the puzzle storage maps were created properly
+    cout << "SIZE INFO ABOUT ALL MAPS" << endl;
+    cout << "-------------------------------------" << endl;
+
+    // Display the size of all edge maps
+    unordered_map<string, unordered_map<int, unordered_set<PuzzlePiece>>> edgeMaps = {
+        {"topEdges", topEdges},
+        {"leftEdges", leftEdges},
+        {"bottomEdges", bottomEdges},
+        {"rightEdges", rightEdges}
+    };
+
+    for (auto ele : edgeMaps) {
+        string name = ele.first;
+        unordered_map<int, unordered_set<PuzzlePiece>> map = ele.second;
+
+        std::cout << name << " map: " << map.size() - 1  << " unique edges + " << map[flatEdge].size()
+        << " flat edges = " << (map.size() + map[flatEdge].size() - 1) << " edges." << std::endl;
+    }
+
+    // Add the 4 color maps prints here with *similar* logic to that above
+    // CODE HERE
+    cout << "-------------------------------------" << endl;
+}
+
+void PuzzleGeneration::savePuzzle() {
+    // Use this function to write to 8 seperate files all 8 (4 edge + 4 color) of the unordered maps
+    cout << "SAVING THE PUZZLE" << endl;
+    cout << "-------------------------------------" << endl;
+    // CODE HERE
+    cout << "Saved all puzzle maps into seperate files." << endl;
 }
