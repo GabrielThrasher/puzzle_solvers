@@ -21,3 +21,5 @@ void PuzzlePiece::initColor(int pixelResPerPiece) {
         colors.push_back(row);
     }
 }
+
+

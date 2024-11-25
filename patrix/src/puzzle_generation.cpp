@@ -259,3 +259,40 @@ void PuzzleGeneration::savePuzzle(unordered_map<int, unordered_set<PuzzlePiece>>
 
     cout << "Saved all puzzle maps into seperate files." << endl;
 }
+
+unordered_map<int, unordered_set<PuzzlePiece>> PuzzleGeneration::gettopEdges() {
+    return topEdges;
+}
+
+unordered_map<int, unordered_set<PuzzlePiece>> PuzzleGeneration::getleftEdges() {
+    return leftEdges;
+}
+
+unordered_map<int, unordered_set<PuzzlePiece>> PuzzleGeneration::getbottomEdges() {
+    return bottomEdges;
+}
+
+unordered_map<int, unordered_set<PuzzlePiece>> PuzzleGeneration::getrightEdges() {
+    return rightEdges;
+}
+
+unordered_map<int, unordered_set<PuzzlePiece>> PuzzleGeneration::gettopLeftQuadColors() {
+    return topLeftQuadColors;
+}
+
+unordered_map<int, unordered_set<PuzzlePiece>> PuzzleGeneration::gettopRightQuadColors() {
+    return topRightQuadColors;
+}
+
+unordered_map<int, unordered_set<PuzzlePiece>> PuzzleGeneration::getbottomLeftQuadColors() {
+    return bottomLeftQuadColors;
+}
+
+unordered_map<int, unordered_set<PuzzlePiece>> PuzzleGeneration::getbottomRightQuadColors() {
+    return bottomRightQuadColors;
+}
+
+int PuzzleGeneration::getFlatEdge() {
+    return flatEdge;
+}
+
