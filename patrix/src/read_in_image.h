@@ -6,7 +6,6 @@
 using namespace std;
 using namespace cv;
 
-
 class image {
 private:
     Mat rgbMatrix;

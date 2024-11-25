@@ -21,8 +21,10 @@ void image::readImage(string imageFile) {
         imwrite(imageFile, img);
     }
 
+    Mat tempMatrix(img.rows, img.cols, CV_8UC3);;
+
     //RGB color matrix
-    rgbMatrix(img.rows, img.cols, CV_8UC3);
+    this->rgbMatrix = tempMatrix;
 
     // Iterate through the image and extract RGB values
     for (int i = 0; i < img.rows; i++) {
