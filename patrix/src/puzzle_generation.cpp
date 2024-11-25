@@ -4,15 +4,16 @@ void PuzzleGeneration::generatePuzzle() {
     cout << "PUZZLE GENERATION" << endl;
     cout << "-------------------------------------" << endl;
     cout << "Starting puzzle generation..." << std::endl;
+    rgbMatrix = img.readImage("PixelArt.PNG");
+
     for (int i = 0; i < rows; i++) {
         puzzleRow.clear();
 
         for (int j = 0; j < cols; j++) {
             PuzzlePiece piece(i, j, pixelResPerPiece);
             puzzleRow.push_back(piece);
-            generatePiece(i, j);
-            // put add color function here
-            generateColor(i, j);
+            addEdges(i, j);
+            addColor(i, j);
             updatePuzzleStorageMaps(j);
         }
         puzzle.push_back(puzzleRow);
@@ -22,7 +23,7 @@ void PuzzleGeneration::generatePuzzle() {
     printPuzzleStorageMapsSize();
 }
 
-void PuzzleGeneration::generatePiece(int row, int col) {
+void PuzzleGeneration::addEdges(int row, int col) {
     PuzzlePiece& piece = puzzleRow[col];
 
     // Top left corner piece
@@ -90,41 +91,34 @@ void PuzzleGeneration::generatePiece(int row, int col) {
     }
 }
 
-bool PuzzleGeneration::isValidColorIndex(int row, int col) {
-    return ((row >= 0 and row < pixelResPerPiece*rows) and (col >= 0 and col < pixelResPerPiece*cols));
+bool PuzzleGeneration::isValidColorIdx(int row, int col) {
+    return ((row >= 0 && row < pixelResPerPiece*rows) && (col >= 0 && col < pixelResPerPiece*cols));
 }
 
+bool PuzzleGeneration::isValidMatirxIdx(int row, int col) {
+    return ((row >= 0 || col >= 0) && (row < pixelResPerPiece || col < pixelResPerPiece));
+}
 
-void PuzzleGeneration::generateColor(int row, int col) {
-    //1's correspond to rows, 2's correspond to columns
-
-    int topLeft1, topRight1, bottomLeft1, bottomRight1;
-    int topLeft2, topRight2, bottomLeft2, bottomRight2;
-    topLeft1 = pixelResPerPiece*row;
-    topLeft2 = pixelResPerPiece*col;
-
-    topRight1 = pixelResPerPiece*row;
-    topRight2 = pixelResPerPiece*col + 1;
-
-    bottomLeft1 = pixelResPerPiece*row + 1;
-    bottomLeft2 =  pixelResPerPiece*col;
-
-    bottomRight1 = pixelResPerPiece*row + 1;
-    bottomRight2 = pixelResPerPiece*col + 1;
+void PuzzleGeneration::addColor(int row, int col) {
+    PuzzlePiece& piece = puzzleRow[col];
+    // Matrix indices for the puzzle matrix
+    int baseMartixRowIdx = 1;
+    int baseMartixColIdx = 1;
 
     for (int i = -1; i <= pixelResPerPiece; i++) {
         for (int j = -1; j <= pixelResPerPiece; j++) {
-            int rowIndex = pixelResPerPiece*row+i;
-            int colIndex = pixelResPerPiece*col+j;
-            if(isValidColorIndex(rowIndex, colIndex)) {
+            // Color indices for the rgbMatrix created from the image
+            int colorRowIdx = pixelResPerPiece*row + i;
+            int colorColIdx = pixelResPerPiece*col + j;
 
+            if(isValidColorIdx(colorRowIdx, colorColIdx) && isValidMatirxIdx(i, j)) {
+                cv::Vec3b pixel = rgbMatrix.at<cv::Vec3b>(colorRowIdx, colorColIdx);
+                int red = pixel[2], green = pixel[1], blue = pixel[0];
+                piece.colors[baseMartixRowIdx + i][baseMartixColIdx + j] = {red, green, blue};
             }
         }
-
     }
 }
-
-
 
 int PuzzleGeneration::getEdge() {
     string octalStr;
@@ -177,16 +171,26 @@ int PuzzleGeneration::getComplementEdge(int num) {
     return stoi(comp);
 }
 
+int PuzzleGeneration::hashRGBValues(tuple<int, int, int> rgb) {
+    string hashValue = to_string(get<0>(rgb)) + to_string(get<1>(rgb)) + to_string(get<2>(rgb));
+
+    return stoi(hashValue);
+}
+
 void PuzzleGeneration::updatePuzzleStorageMaps(int col) {
     PuzzlePiece& piece = puzzleRow[col];
 
+    // Update edge storage
     topEdges[piece.edges[topEdgeName]].insert(piece);
     leftEdges[piece.edges[leftEdgeName]].insert(piece);
     bottomEdges[piece.edges[bottomEdgeName]].insert(piece);
     rightEdges[piece.edges[rightEdgeName]].insert(piece);
 
-    // Add the 4 color maps updates here with the *exact same* logic to that above
-    // CODE HERE
+    // Update color storage
+    topLeftQuadColors[hashRGBValues(piece.colors[1][1])].insert(piece);
+    topRightQuadColors[hashRGBValues(piece.colors[1][2])].insert(piece);
+    bottomLeftQuadColors[hashRGBValues(piece.colors[2][1])].insert(piece);
+    bottomRightQuadColors[hashRGBValues(piece.colors[2][2])].insert(piece);
 }
 
 void PuzzleGeneration::printPuzzleStorageMapsSize() {
@@ -201,7 +205,6 @@ void PuzzleGeneration::printPuzzleStorageMapsSize() {
         {"bottomEdges", bottomEdges},
         {"rightEdges", rightEdges}
     };
-
     for (auto ele : edgeMaps) {
         string name = ele.first;
         unordered_map<int, unordered_set<PuzzlePiece>> map = ele.second;
@@ -210,8 +213,20 @@ void PuzzleGeneration::printPuzzleStorageMapsSize() {
         << " flat edges = " << (map.size() + map[flatEdge].size() - 1) << " edges." << std::endl;
     }
 
-    // Add the 4 color maps prints here with *similar* logic to that above
-    // CODE HERE
+    // Display the size of all color maps
+    unordered_map<string, unordered_map<int, unordered_set<PuzzlePiece>>> colorMaps = {
+        {"topLeftQuadColors", topLeftQuadColors},
+        {"topRightQuadColors", topRightQuadColors},
+        {"bottomLeftQuadColors", bottomLeftQuadColors},
+        {"bottomRightQuadColors", bottomRightQuadColors}
+    };
+    for (auto ele : colorMaps) {
+        string name = ele.first;
+        unordered_map<int, unordered_set<PuzzlePiece>> map = ele.second;
+
+        std::cout << name << " map: " << map.size() << " unique colors." << std::endl;
+    }
+
     cout << "-------------------------------------" << endl;
 }
 
@@ -222,6 +237,3 @@ void PuzzleGeneration::savePuzzle() {
     // CODE HERE
     cout << "Saved all puzzle maps into seperate files." << endl;
 }
-
-
-

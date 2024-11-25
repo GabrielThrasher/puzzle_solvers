@@ -4,15 +4,13 @@
 #include <opencv2/imgcodecs.hpp>
 #include <opencv2/highgui.hpp>
 using namespace std;
-using namespace cv;
+#pragma once
 
 class image {
-private:
-    Mat img;
+    cv::Mat img;
     string imageFile;
 public:
-    Mat readImage(string imageFile);
-
+    cv::Mat readImage(string file);
     void displayImage();
 };
 

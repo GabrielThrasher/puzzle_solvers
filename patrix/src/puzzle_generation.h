@@ -7,7 +7,6 @@
 #include <functional>
 #include <vector>
 #include <unordered_set>
-
 using namespace std;
 
 class PuzzleGeneration{
@@ -15,12 +14,19 @@ class PuzzleGeneration{
     vector<PuzzlePiece> puzzleRow;
 
     image img;
-    Mat rgbMatrix = img.readImage("PixelArt.png");
+    cv::Mat rgbMatrix;
 
+    // Storage by edge
     unordered_map<int, unordered_set<PuzzlePiece>> topEdges;
     unordered_map<int, unordered_set<PuzzlePiece>> leftEdges;
     unordered_map<int, unordered_set<PuzzlePiece>> bottomEdges;
     unordered_map<int, unordered_set<PuzzlePiece>> rightEdges;
+
+    // Storage by quadrant color
+    unordered_map<int, unordered_set<PuzzlePiece>> topLeftQuadColors;
+    unordered_map<int, unordered_set<PuzzlePiece>> topRightQuadColors;
+    unordered_map<int, unordered_set<PuzzlePiece>> bottomLeftQuadColors;
+    unordered_map<int, unordered_set<PuzzlePiece>> bottomRightQuadColors;
 
     int cols = 424; // X dimension of puzzle
     int rows = 238; // Y dimension of puzzle
@@ -28,6 +34,7 @@ class PuzzleGeneration{
     int minRowIdx = 0;
     int maxColIdx = cols-1;
     int maxRowIdx = rows-1;
+    // How many pixels wide (and tall) per piece; higher value = greater image detail and more screen space used
     int pixelResPerPiece = 2;
 
     int flatEdge = 44444444; // Octal value for a flat edge
@@ -36,17 +43,16 @@ class PuzzleGeneration{
     string bottomEdgeName = "bottomEdge";
     string rightEdgeName = "rightEdge";
 
-    void generatePiece(int row, int col);
-    void generateColor(int row, int col);
-
-
+    void addEdges(int row, int col);
+    void addColor(int row, int col);
     int getEdge();
     int getUniqueEdge(unordered_map<int, unordered_set<PuzzlePiece>>* map);
     int getComplementEdge(int num);
     void updatePuzzleStorageMaps(int col);
     void printPuzzleStorageMapsSize();
-
-    bool isValidColorIndex(int row, int col);
+    bool isValidColorIdx(int row, int col);
+    bool isValidMatirxIdx(int row, int col);
+    int hashRGBValues(tuple<int, int, int> rgb);
 
 public:
     void generatePuzzle();

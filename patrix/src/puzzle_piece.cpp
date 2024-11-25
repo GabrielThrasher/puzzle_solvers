@@ -12,11 +12,12 @@ bool PuzzlePiece::operator==(const PuzzlePiece& other) const {
 
 void PuzzlePiece::initColor(int pixelResPerPiece) {
     std::tuple<int, int, int> arr = {-1, -1, -1};
+
     for (int i = 0; i < pixelResPerPiece + 2; i++) {
         vector<tuple<int, int, int>> row;
         for (int j = 0; j < pixelResPerPiece + 2; j++) {
             row.push_back(arr);
         }
-
+        colors.push_back(row);
     }
 }

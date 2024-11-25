@@ -1,21 +1,19 @@
 #include <iostream>
 #include <unordered_map>
 #include <fstream>
+#include <vector>
 using namespace std;
 
 class PuzzlePiece {
 public:
     unordered_map<string, int> edges;
-
-    vector<vector<int[3]>> colors;
-
+    vector<vector<tuple<int, int, int>>> colors;
 
     int col;
     int row;
 
     PuzzlePiece(int row, int col, int pixelResPerPiece);
     bool operator==(const PuzzlePiece& other) const;
-
     void initColor(int pixelResPerPiece);
 };
 
