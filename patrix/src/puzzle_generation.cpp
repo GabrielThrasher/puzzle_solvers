@@ -5,18 +5,19 @@ void PuzzleGeneration::generatePuzzle() {
     cout << "-------------------------------------" << endl;
     cout << "Starting puzzle generation..." << std::endl;
     for (int i = 0; i < rows; i++) {
-        puzzleRow = {};
+        puzzleRow.clear();
 
         for (int j = 0; j < cols; j++) {
-            PuzzlePiece piece(i, j);
+            PuzzlePiece piece(i, j, pixelResPerPiece);
             puzzleRow.push_back(piece);
             generatePiece(i, j);
             // put add color function here
+            generateColor(i, j);
             updatePuzzleStorageMaps(j);
         }
         puzzle.push_back(puzzleRow);
     }
-    cout << "Finsihed puzzle generation." << endl;
+    cout << "Finished puzzle generation." << endl;
     cout << "-------------------------------------" << endl;
     printPuzzleStorageMapsSize();
 }
@@ -88,6 +89,42 @@ void PuzzleGeneration::generatePiece(int row, int col) {
         piece.edges[rightEdgeName] = getUniqueEdge(&rightEdges);
     }
 }
+
+bool PuzzleGeneration::isValidColorIndex(int row, int col) {
+    return ((row >= 0 and row < pixelResPerPiece*rows) and (col >= 0 and col < pixelResPerPiece*cols));
+}
+
+
+void PuzzleGeneration::generateColor(int row, int col) {
+    //1's correspond to rows, 2's correspond to columns
+
+    int topLeft1, topRight1, bottomLeft1, bottomRight1;
+    int topLeft2, topRight2, bottomLeft2, bottomRight2;
+    topLeft1 = pixelResPerPiece*row;
+    topLeft2 = pixelResPerPiece*col;
+
+    topRight1 = pixelResPerPiece*row;
+    topRight2 = pixelResPerPiece*col + 1;
+
+    bottomLeft1 = pixelResPerPiece*row + 1;
+    bottomLeft2 =  pixelResPerPiece*col;
+
+    bottomRight1 = pixelResPerPiece*row + 1;
+    bottomRight2 = pixelResPerPiece*col + 1;
+
+    for (int i = -1; i <= pixelResPerPiece; i++) {
+        for (int j = -1; j <= pixelResPerPiece; j++) {
+            int rowIndex = pixelResPerPiece*row+i;
+            int colIndex = pixelResPerPiece*col+j;
+            if(isValidColorIndex(rowIndex, colIndex)) {
+
+            }
+        }
+
+    }
+}
+
+
 
 int PuzzleGeneration::getEdge() {
     string octalStr;
@@ -185,3 +222,6 @@ void PuzzleGeneration::savePuzzle() {
     // CODE HERE
     cout << "Saved all puzzle maps into seperate files." << endl;
 }
+
+
+

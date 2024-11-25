@@ -8,8 +8,11 @@ using namespace cv;
 
 class image {
 private:
-    Mat rgbMatrix;
+    Mat img;
+    string imageFile;
 public:
-    void readImage(string imageFile);
+    Mat readImage(string imageFile);
+
+    void displayImage();
 };
 
