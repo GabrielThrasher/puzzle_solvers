@@ -56,6 +56,6 @@ class PuzzleGeneration{
 
 public:
     void generatePuzzle();
-    void savePuzzle();
+    void savePuzzle(unordered_map<int, unordered_set<PuzzlePiece>> map, const string& filename);
 };
 
