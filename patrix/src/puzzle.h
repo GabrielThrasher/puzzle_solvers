@@ -11,8 +11,8 @@ using ColorMap = unordered_map<int, unordered_set<PuzzlePiece *>>;
 
 class Puzzle {
     // Puzzle properties
-    int cols = 424; // X dimension of puzzle
-    int rows = 238; // Y dimension of puzzle
+    int cols = 317; // X dimension of puzzle
+    int rows = 317; // Y dimension of puzzle
     int pieceSize = 2;
     int flatEdge = 44444444; // Octal value for a flat edge
 

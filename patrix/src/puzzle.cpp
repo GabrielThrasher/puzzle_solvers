@@ -18,7 +18,6 @@ void Puzzle::generateFromImage(string imagePath) {
         readImage(imagePath, cols * pieceSize, rows * pieceSize);
 
     for (int i = 0; i < rows; i++) {
-
         for (int j = 0; j < cols; j++) {
             PuzzlePiece *piece = new PuzzlePiece(i, j, pieceSize);
 

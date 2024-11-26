@@ -8,7 +8,6 @@ using namespace std;
 
 class PuzzlePiece {
   public:
-    // unordered_map<string, int> edges;
     vector<vector<tuple<int, int, int>>> colors;
 
     int col;
