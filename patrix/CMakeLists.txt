@@ -24,10 +24,9 @@ include_directories(src)
 
 add_executable(Main
         src/main.cpp
-        src/puzzle_generation.cpp
         src/puzzle_piece.cpp
         src/puzzle.cpp
-        src/read_in_image.cpp
+        src/process_image.cpp
         )
         
 # These tests can use the Catch2-provided main
