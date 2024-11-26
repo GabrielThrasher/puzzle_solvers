@@ -1,13 +1,29 @@
-<!doctype html>
-<html lang="en">
-  <head>
-    <meta charset="UTF-8" />
-    <link rel="icon" type="image/svg+xml" href="/vite.svg" />
-    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>Vite + React</title>
-  </head>
-  <body>
-    <div id="root"></div>
-    <script type="module" src="/src/main.jsx"></script>
-  </body>
+<html>
+    <head>
+        <meta charset="utf-8" />
+        <link rel="stylesheet" href="style.css" />
+        <script src="https://cdn.jsdelivr.net/npm/p5@1.9.4/lib/p5.js"></script>
+        <script src="main.js"></script>
+    </head>
+    <body>
+        <div id="root">
+            <div>
+                <h1 id="title">Patrix 🧩</h1>
+                <p>
+                    An edge algorithm or a color algorithm -- which one is
+                    faster at solving the same 100,000-piece puzzle?
+                </p>
+                <button id="start-btn">start 🚀</button>
+                <div id="visualization-area">
+                    <div id="canvas1" class="puzzle-canvas"></div>
+                    <div id="canvas2" class="puzzle-canvas"></div>
+                </div>
+                <div id="controls-area">
+                    <div class="control-btn">⏪</div>
+                    <div id="pause-btn" class="control-btn">pause</div>
+                    <div class="control-btn">️⏩</div>
+                </div>
+            </div>
+        </div>
+    </body>
 </html>
