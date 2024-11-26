@@ -242,3 +242,18 @@ bool Puzzle::isValidColorIdx(int row, int col) {
 bool Puzzle::isValidMatirxIdx(int row, int col) {
     return ((row >= 0 || col >= 0) && (row < pieceSize || col < pieceSize));
 }
+
+void Puzzle::EdgeAlgorithm() {
+    //Locate top left corner piece: Has two flat edges
+    auto set1 = topEdges[flatEdge];
+    auto set2 = leftEdges[flatEdge];
+
+
+    for (auto element: set1) {
+        if (set2.find(element) != set2.end()) {
+            break;
+        }
+    }
+
+}
+

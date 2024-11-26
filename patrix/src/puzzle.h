@@ -45,7 +45,13 @@ class Puzzle {
     bool isValidColorIdx(int row, int col);
     bool isValidMatirxIdx(int row, int col);
 
+    //Puzzle matrix here
+
   public:
     Puzzle();
+
     void generateFromImage(string imagePath);
+    void EdgeAlgorithm();
 };
+
+
