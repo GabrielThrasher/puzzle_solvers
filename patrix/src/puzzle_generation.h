@@ -1,3 +1,4 @@
+#pragma once
 #include <iostream>
 #include <string>
 #include <random>
@@ -56,6 +57,19 @@ class PuzzleGeneration{
 
 public:
     void generatePuzzle();
-    void savePuzzle();
+    void savePuzzle(unordered_map<int, unordered_set<PuzzlePiece>> map, const string& filename);
+
+    unordered_map<int, unordered_set<PuzzlePiece>> gettopEdges();
+    unordered_map<int, unordered_set<PuzzlePiece>> getleftEdges();
+    unordered_map<int, unordered_set<PuzzlePiece>> getbottomEdges();
+    unordered_map<int, unordered_set<PuzzlePiece>> getrightEdges();
+
+    unordered_map<int, unordered_set<PuzzlePiece>> gettopLeftQuadColors();
+    unordered_map<int, unordered_set<PuzzlePiece>> gettopRightQuadColors();
+    unordered_map<int, unordered_set<PuzzlePiece>> getbottomLeftQuadColors();
+    unordered_map<int, unordered_set<PuzzlePiece>> getbottomRightQuadColors();
+
+    int getFlatEdge();
+
 };
 

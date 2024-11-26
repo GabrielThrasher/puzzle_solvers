@@ -230,10 +230,69 @@ void PuzzleGeneration::printPuzzleStorageMapsSize() {
     cout << "-------------------------------------" << endl;
 }
 
-void PuzzleGeneration::savePuzzle() {
+void PuzzleGeneration::savePuzzle(unordered_map<int, unordered_set<PuzzlePiece>> map, const string& filename) {
     // Use this function to write to 8 seperate files all 8 (4 edge + 4 color) of the unordered maps
     cout << "SAVING THE PUZZLE" << endl;
     cout << "-------------------------------------" << endl;
     // CODE HERE
+
+    //Write topEdges to file
+    ofstream file(filename);
+    if (!file) {
+        cout << "Error" << endl;
+        return;
+    }
+    for (const auto& pair : map) {
+        //Write the key
+        file << pair.first << " ";
+        //Write the size of the unordered_set
+        file << pair.second.size() << " ";
+
+        //Serialize the unordered_set of Objects
+        for (const auto& obj : pair.second) {
+            //Write each object in the set
+            //file << obj << " ";
+        }
+        file << "\n";
+    }
+    file.close();
+
     cout << "Saved all puzzle maps into seperate files." << endl;
 }
+
+unordered_map<int, unordered_set<PuzzlePiece>> PuzzleGeneration::gettopEdges() {
+    return topEdges;
+}
+
+unordered_map<int, unordered_set<PuzzlePiece>> PuzzleGeneration::getleftEdges() {
+    return leftEdges;
+}
+
+unordered_map<int, unordered_set<PuzzlePiece>> PuzzleGeneration::getbottomEdges() {
+    return bottomEdges;
+}
+
+unordered_map<int, unordered_set<PuzzlePiece>> PuzzleGeneration::getrightEdges() {
+    return rightEdges;
+}
+
+unordered_map<int, unordered_set<PuzzlePiece>> PuzzleGeneration::gettopLeftQuadColors() {
+    return topLeftQuadColors;
+}
+
+unordered_map<int, unordered_set<PuzzlePiece>> PuzzleGeneration::gettopRightQuadColors() {
+    return topRightQuadColors;
+}
+
+unordered_map<int, unordered_set<PuzzlePiece>> PuzzleGeneration::getbottomLeftQuadColors() {
+    return bottomLeftQuadColors;
+}
+
+unordered_map<int, unordered_set<PuzzlePiece>> PuzzleGeneration::getbottomRightQuadColors() {
+    return bottomRightQuadColors;
+}
+
+int PuzzleGeneration::getFlatEdge() {
+    return flatEdge;
+}
+
