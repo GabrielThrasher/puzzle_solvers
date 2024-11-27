@@ -4,7 +4,9 @@ An edge algorithm or a color algorithm -- which one is faster at solving the sam
 - Report: LINK
 - Original specs and documentation (for our reference when designing and building Patrix; NOT our submission for the report part of the project): https://docs.google.com/document/d/1sJvK5-OlWxgxBep6HvHFPAjq5-HgX8BW5DxKM1seIF0/edit?usp=sharing
 
-We recommend using Visual Studio (VS) Code to run the code.
+We highly recommend the following while running the code as that is what it has been proven to work on:
+- IDE/Code Editor: Visual Studio (VS) Code
+- Complier: Visual Studio complier (which means you'll need Visual Studio + the "Desktop development with C++ workload" extension downloaded on your computer)
 
 # OpenCV Requirment
 OpenCV helped us get the RGB colors of each pixel in an image for puzzle. So, you will need OpenCV installed on your computer to be able to run the code. If OpenCV is not installed on your computer, or you want to verify that its set up correctly to be able to run the code, follow these steps below:
@@ -30,6 +32,6 @@ iex ((New-Object System.Net.WebClient).DownloadString('https://community.chocola
     - OPENCV_LINK_PATHS | C:\tools\opencv\build\x64\vc16\lib
     - OPENCV_PATH | C:\tools\opencv
 12. Click on "OK" and then click on "OK" again. Restart your computer for the changes to fully take effect.
-13. Make sure you are using the Visual Studio complier
+13. Make sure you are using the Visual Studio complier (which means you'll need Visual Studio + the "Desktop development with C++ workload" extension downloaded on your computer). 
 14. Use the CMakeList.txt file that we provided in the repo to be able to run the code.
 15. You're all set now! Happy exploring!
