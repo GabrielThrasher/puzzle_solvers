@@ -128,7 +128,7 @@ int Puzzle::getUniqueEdge(EdgeMap &map) {
     int edge = getEdge();
     auto iter = map.find(edge);
     // Keep generating a new edge octal value for as long as it is already being
-    // used in an same-side edge OR is the same as the flat edge value
+    // used in a same-side edge OR is the same as the flat edge value
     while (iter != map.end() || edge == flatEdge) {
         edge = getEdge();
         iter = map.find(edge);
@@ -247,13 +247,105 @@ void Puzzle::EdgeAlgorithm() {
     //Locate top left corner piece: Has two flat edges
     auto set1 = topEdges[flatEdge];
     auto set2 = leftEdges[flatEdge];
+    auto set3 = rightEdges[flatEdge];
+    auto set4 = bottomEdges[flatEdge];
+    int complement1;  //Complement of right edge: Left edge
+    int complement2;  //Complement of bottom edge: Top edge
+    int complement3;  //Complement of left edge: Right edge
+    int complement4;  //Complement of top edge: Bottom edge
 
-
+    //For every element in the set of flat tops
     for (auto element: set1) {
+        //If that element can be found in the set of flat lefts
         if (set2.find(element) != set2.end()) {
+            //Write to file location + rgb values
+            complement1 = getComplementEdge(element->right);
+            //cout << "Row: " << element->row << "Col: " << element->col << endl;
             break;
         }
     }
+
+    //Start at col = 1
+    //Fetch complement: repeatedly get left edge of adjacent piece
+    for (int i = 1; i < cols; i++) {
+        //Index leftEdges map with the complement-> returns set of all possible pieces
+        auto leftSet = leftEdges[complement1];
+        //For every element in the left set with that particular edge
+        for(auto element: leftSet) {
+            //If that element can be found in the set of flat tops
+            if (set1.find(element) != set1.end()) {
+                //Write to file location + rgb values
+                complement1 = getComplementEdge(element->right);
+                //If i is the index of the last puzzle piece
+                if(i == cols - 1) {
+                    //Get the complement of the bottom edge to prepare for vertical portion of algorithm
+                    complement2 = getComplementEdge(element->bottom);
+                }
+                //cout << "Row: " << element->row << "Col: " << element->col << endl;
+            }
+        }
+    }
+
+    //Start at row = 1
+    for (int i = 1; i < rows; i++) {
+        //Index topEdges map with the complement-> returns set of all possible pieces
+        auto topSet = topEdges[complement2];
+        //For every element in the top set with that particular edge
+        for(auto element: topSet) {
+            //If that element can be found in the set of flat rights
+            if (set3.find(element) != set3.end()) {
+                //Write to file location + rgb values
+                complement2 = getComplementEdge(element->bottom);
+                //If i is the index of the bottommost puzzle piece
+                if (i == rows - 1) {
+                    //Get complement of left edge to prepare for right to left portion of algorithm
+                    complement3 = getComplementEdge(element->left);
+                }
+                //cout << "Row: " << element->row << "Col: " << element->col << endl;
+            }
+        }
+    }
+
+    //Start at col = 315
+    for (int i = cols - 2; i >= 0; i--) {
+        //Index rightEdges map with the complement-> returns set of all possible pieces
+        auto rightSet = rightEdges[complement3];
+        //For every element in the right set with that particular edge
+        for(auto element: rightSet) {
+            //If that element can be found in the set of flat bottoms
+            if (set4.find(element) != set4.end()) {
+                //Write to file location + rgb values
+                complement3 = getComplementEdge(element->left);
+                //If i is the index of the bottommost puzzle piece
+                if (i == 0) {
+                    //Get complement of top edge to prepare for bottom to top portion of algorithm
+                    complement4 = getComplementEdge(element->top);
+                }
+                //cout << "Row: " << element->row << "Col: " << element->col << endl;
+            }
+        }
+    }
+
+    //Start at row = 315
+    for (int i = rows - 2; i > 0; i--) {
+        //Index bottomEdges map with the complement-> returns set of all possible pieces
+        auto bottomSet = bottomEdges[complement4];
+        //For every element in the bottom set with that particular edge
+        for(auto element: bottomSet) {
+            //If that element can be found in the set of flat lefts
+            if (set2.find(element) != set2.end()) {
+                //Write to file location + rgb values
+                complement4 = getComplementEdge(element->top);
+                //If i is the index of the bottommost puzzle piece
+                if (i == 1) {
+                    //Get complement of right edge to prepare for another left to right portion of algorithm
+                    complement1 = getComplementEdge(element->right);
+                }
+                //cout << "Row: " << element->row << "Col: " << element->col << endl;
+            }
+        }
+    }
+
 
 }
 
