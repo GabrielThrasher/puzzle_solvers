@@ -245,101 +245,114 @@ bool Puzzle::isValidMatirxIdx(int row, int col) {
 
 void Puzzle::EdgeAlgorithm() {
     //This will fetch top left corner piece first
-    int leftComplement = 44444444;
-    int topComplement = 44444444;
-    int rightComplement = 44444444;
-    int bottomComplement = 44444444;
+    int leftComplement;
+    int topComplement;
+    int rightComplement;
+    int bottomComplement;
     int leftIdx = 0;
     int rightIdx = cols;
     int topIdx = 1;
     int bottomIdx = rows;
+    bool isStarting = true;
+    int counter;
+    bool isOdd = false;
 
-
-    for (int i = leftIdx; i < rightIdx; i++) {
-        //Index leftEdges map with the complement-> returns set of all possible pieces
-        auto leftSet = leftEdges[leftComplement];
-        //For every element in the left set with that particular edge
-        for(auto element: leftSet) {
-            //If that element can be found in the set of "complement" tops
-            if (topEdges[topComplement].find(element) != topEdges[topComplement].end()) {
-                //Write to file location + rgb values
-                leftComplement = getComplementEdge(element->right);
-                //If i is the index of the last puzzle piece
-                if(i == rightIdx - 1) {
-                    //Get the complement of the bottom edge to prepare for top to down portion of algorithm
-                    topComplement = getComplementEdge(element->bottom);
-                }
-                cout << "Row: " << element->row << "Col: " << element->col << endl;
-            }
-        }
+    if (rows % 2 == 0) {
+        counter = rows/2;
+        isOdd = false;
+    }
+    else {
+        counter = (rows-1)/2;
+        isOdd = true;
     }
 
-    //Start at row = 1
-    for (int i = topIdx; i < bottomIdx; i++) {
-        //Index topEdges map with the complement-> returns set of all possible pieces
-        auto topSet = topEdges[topComplement];
-        //For every element in the top set with that particular edge
-        for(auto element: topSet) {
-            //If that element can be found in the set of flat rights
-            if (rightEdges[rightComplement].find(element) != rightEdges[rightComplement].end()) {
-                //Write to file location + rgb values
-                topComplement = getComplementEdge(element->bottom);
-                //If i is the index of the bottommost puzzle piece
-                if (i == bottomIdx - 1) {
-                    //Get complement of left edge to prepare for right to left portion of algorithm
-                    rightComplement = getComplementEdge(element->left);
+    while(counter > 0) {
+        for (int i = leftIdx; i < rightIdx; i++) {
+            if (isStarting) {
+                //Locate top left corner piece
+                for (auto element: topEdges[flatEdge]) {
+                    if (leftEdges[flatEdge].find(element) != leftEdges[flatEdge].end()) {
+                        //Write to file location + rgb values
+                        cout << "Row: " << element->row << "Col: " << element->col << endl;
+                        leftComplement = getComplementEdge(element->right);
+                        isStarting = false;
+                    }
                 }
-                cout << "Row: " << element->row << "Col: " << element->col << endl;
+                continue;
             }
+            //Index leftEdges map with the complement
+            auto leftSet = leftEdges[leftComplement];
+            auto element = leftSet.begin();
+
+            //Write to file location + rgb values
+
+            leftComplement = getComplementEdge((*element)->right);
+            //If i is the index of the last puzzle piece
+            if (i == rightIdx - 1) {
+                //Get the complement of the bottom edge to prepare for top to down portion of algorithm
+                topComplement = getComplementEdge((*element)->bottom);
+            }
+            cout << "Row: " << (*element)->row << "Col: " << (*element)->col << endl;
         }
+
+        //Start at row = 1
+        for (int i = topIdx; i < bottomIdx; i++) {
+            //Index topEdges map with the complement-> returns set of all possible pieces
+            auto topSet = topEdges[topComplement];
+            auto element = topSet.begin();
+            //Write to file location + rgb values
+            topComplement = getComplementEdge((*element)->bottom);
+            //If i is the index of the bottommost puzzle piece
+            if (i == bottomIdx - 1) {
+                //Get complement of left edge to prepare for right to left portion of algorithm
+                rightComplement = getComplementEdge((*element)->left);
+            }
+            cout << "Row: " << (*element)->row << "Col: " << (*element)->col << endl;
+        }
+
+        //Start at col = 315
+        for (int i = rightIdx - 2; i >= leftIdx; i--) {
+            //Index rightEdges map with the complement
+            auto rightSet = rightEdges[rightComplement];
+            auto element = rightSet.begin();
+            //Write to file location + rgb values
+            rightComplement = getComplementEdge((*element)->left);
+            //If i is the index of the bottommost puzzle piece
+            if (i == leftIdx) {
+                //Get complement of top edge to prepare for bottom to top portion of algorithm
+                bottomComplement = getComplementEdge((*element)->top);
+            }
+            cout << "Row: " << (*element)->row << "Col: " << (*element)->col << endl;
+        }
+
+        //Start at row = 315
+        for (int i = bottomIdx - 2; i >= topIdx; i--) {
+            //Index bottomEdges map with the complement-> returns set of all possible pieces
+            auto bottomSet = bottomEdges[bottomComplement];
+            auto element = bottomSet.begin();
+            //Write to file location + rgb values
+            bottomComplement = getComplementEdge((*element)->top);
+            //If i is the index of the bottommost puzzle piece
+            if (i == topIdx) {
+                //Get complement of right edge to prepare for another left to right portion of algorithm
+                leftComplement = getComplementEdge((*element)->right);
+            }
+            cout << "Row: " << (*element)->row << "Col: " << (*element)->col << endl;
+        }
+
+        leftIdx++;
+        rightIdx--;
+        topIdx++;
+        bottomIdx--;
+        counter -= 2;
     }
 
-    //Start at col = 315
-    for (int i = rightIdx - 2; i >= leftIdx; i--) {
-        //Index rightEdges map with the complement-> returns set of all possible pieces
-        auto rightSet = rightEdges[rightComplement];
-        //For every element in the right set with that particular edge
-        for(auto element: rightSet) {
-            //If that element can be found in the set of flat bottoms
-            if (bottomEdges[bottomComplement].find(element) != bottomEdges[bottomComplement].end()) {
-                //Write to file location + rgb values
-                rightComplement = getComplementEdge(element->left);
-                //If i is the index of the bottommost puzzle piece
-                if (i == leftIdx) {
-                    //Get complement of top edge to prepare for bottom to top portion of algorithm
-                    bottomComplement = getComplementEdge(element->top);
-                }
-                cout << "Row: " << element->row << "Col: " << element->col << endl;
-            }
-        }
+    if (isOdd) {
+        auto lastSet = leftEdges[leftComplement];
+        auto element = lastSet.begin();
+        //Write to file location + rgb values
+        cout << "Row: " << (*element)->row << "Col: " << (*element)->col << endl;
+
     }
-
-    //Start at row = 315
-    for (int i = bottomIdx - 2; i >= topIdx; i--) {
-        //Index bottomEdges map with the complement-> returns set of all possible pieces
-        auto bottomSet = bottomEdges[bottomComplement];
-        //For every element in the bottom set with that particular edge
-        for(auto element: bottomSet) {
-            //If that element can be found in the set of flat lefts
-            if (leftEdges[flatEdge].find(element) != leftEdges[flatEdge].end()) {
-                //Write to file location + rgb values
-                bottomComplement = getComplementEdge(element->top);
-                //If i is the index of the bottommost puzzle piece
-                if (i == topIdx) {
-                    //Get complement of right edge to prepare for another left to right portion of algorithm
-                    leftComplement = getComplementEdge(element->right);
-                }
-                cout << "Row: " << element->row << "Col: " << element->col << endl;
-            }
-        }
-    }
-
-    leftIdx++;
-    rightIdx--;
-    topIdx++;
-    bottomIdx--;
-
-
-
 }
 
