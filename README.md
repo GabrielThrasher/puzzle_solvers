@@ -17,7 +17,7 @@ iex ((New-Object System.Net.WebClient).DownloadString('https://community.chocola
 3. Run the following command:
     - choco install opencv
 4. When prompted with "Do you want to run the script?([Y]es/[A]ll - yes to all/[N]o/[P]rint): " during the execution of the previous command, type "yes" and hit enter.
-5. Go to your environment variables on your computer. (On Windows, type "env" in the taskbar's search; go into the app that first pops up.)
+5. Close your terminal and go to your environment variables on your computer. (On Windows, type "env" in the taskbar's search; go into the app that first pops up.)
 6. Click on "Environment Variables" that's on the bottom right of the pop up app.
 7. Under "User variables for {folder name on your computer}", click on "Path" and then "Edit".
 8. Delete any instance of OpenCV in preparation for for the new addition.
