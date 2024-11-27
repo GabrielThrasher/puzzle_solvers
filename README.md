@@ -11,6 +11,7 @@ We highly recommend the following while running the code as that is what it has 
 # OpenCV Requirment
 OpenCV helped us get the RGB colors of each pixel in an image for puzzle. So, you will need OpenCV installed on your computer to be able to run the code. If OpenCV is not installed on your computer, or you want to verify that its set up correctly to be able to run the code, follow these steps below:
 
+## For Windows
 1. Open your terminal as administrator or equivalent.
 2. If you do not have Chocolatey (what is used to install OpenCV) installed on your computer, run the following command:
     - Set-ExecutionPolicy Bypass -Scope Process -Force
@@ -19,7 +20,7 @@ iex ((New-Object System.Net.WebClient).DownloadString('https://community.chocola
 3. Run the following command:
     - choco install opencv
 4. When prompted with "Do you want to run the script?([Y]es/[A]ll - yes to all/[N]o/[P]rint): " during the execution of the previous command, type "yes" and hit enter.
-5. Close your terminal and go to your environment variables on your computer. (On Windows, type "env" in the taskbar's search; go into the app that first pops up.)
+5. Close your terminal and go to your environment variables on your computer (type "env" in the taskbar's search; go into the app that first pops up).
 6. Click on "Environment Variables" that's on the bottom right of the pop up app.
 7. Under "User variables for {folder name on your computer}", click on "Path" and then "Edit".
 8. Delete any instance of OpenCV in preparation for for the new addition.
@@ -34,4 +35,5 @@ iex ((New-Object System.Net.WebClient).DownloadString('https://community.chocola
 12. Click on "OK" and then click on "OK" again. Restart your computer for the changes to fully take effect.
 13. Make sure you are using the Visual Studio complier (which means you'll need Visual Studio + the "Desktop development with C++ workload" extension downloaded on your computer). 
 14. Use the CMakeList.txt file that we provided in the repo to be able to run the code.
-15. You're all set now! Happy exploring!
+
+You're all set now! Happy exploring!
