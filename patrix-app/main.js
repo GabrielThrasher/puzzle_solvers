@@ -15,8 +15,9 @@ async function startPuzzle() {
 
         const data = await response1.arrayBuffer();
         const data3 = await response2.arrayBuffer();
-        const bytes = new Uint8Array(data);
-        const bytes2 = new Uint8Array(data3);
+        const bytes = new Uint16Array(data);
+        const bytes2 = new Uint16Array(data3);
+        console.log(bytes.length);
         renderCanvas(bytes);
         renderCanvas2(bytes2);
     } catch (error) {
@@ -33,27 +34,35 @@ init();
  * - scale down the puzzle?
  * - pause/play and controlling speed
  */
+const WIDTH = 634;
+const HEIGHT = 634;
 function renderCanvas(bytes) {
     let canvas1 = new p5((s) => {
         let items = [];
         let size = 2;
         let b = 0;
+        let i = 0;
 
         s.setup = () => {
-            s.createCanvas(600, 600);
+            s.createCanvas(WIDTH, HEIGHT);
             let c = setInterval(() => {
                 if (b >= bytes.length) {
                     clearInterval(c);
                     return;
                 }
-                items.push({
-                    x: bytes[b] * size,
-                    y: bytes[b + 1] * size,
-                    size,
-                    isDrawn: false,
-                });
-                b += 2;
-            }, 5);
+
+                for (let x = 0; x < 30; x++) {
+                    items.push({
+                        x: bytes[b] * size,
+                        y: bytes[b + 1] * size,
+                        size,
+                        isDrawn: false,
+                    });
+                    // i = b;
+                    b += 2;
+                }
+                // b += 2;
+            }, 1);
             s.background(0);
             s.fill(255);
         };
@@ -78,7 +87,7 @@ function renderCanvas2(bytes) {
         let b = 0;
 
         s.setup = () => {
-            s.createCanvas(600, 600);
+            s.createCanvas(WIDTH, HEIGHT);
             let c = setInterval(() => {
                 if (b >= bytes.length) {
                     clearInterval(c);
@@ -91,7 +100,7 @@ function renderCanvas2(bytes) {
                     isDrawn: false,
                 });
                 b += 2;
-            }, 5);
+            }, 1);
             s.background(0);
             s.fill(255);
         };
