@@ -4,7 +4,7 @@ using namespace std;
 
 int main() {
     Puzzle puzzle;
-    puzzle.generateFromImage("PixelArt.png");
+    puzzle.generateFromImage("images/black.png");
 
     puzzle.EdgeAlgorithm();
 }
