@@ -1,3 +1,5 @@
+import { settings } from "./settings";
+
 export async function startPuzzle() {
     try {
         const [edgeResponse, colorResponse] = await Promise.all([
@@ -33,10 +35,16 @@ const PIECE_SIZE = 2;
 
 function renderCanvas(bytes, canvasId) {
     new p5((s) => {
-        let items = [];
+        let batch = [];
+        let count = batch.length;
 
         s.setup = () => {
             s.createCanvas(WIDTH, HEIGHT);
+
+            settings.listenToPauseState((paused) => {
+                if (paused) s.noLoop();
+                else s.loop();
+            });
 
             let b = 0;
             let c = setInterval(() => {
@@ -46,29 +54,34 @@ function renderCanvas(bytes, canvasId) {
                     return;
                 }
 
-                // TODO: Change batchSize based on current speed
-                const batchSize = 30;
-                for (let x = 0; x < batchSize; x++) {
-                    items.push({
+                if (count !== 0) return;
+
+                batch = [];
+
+                if (settings.paused) return;
+
+                for (let x = 0; x < settings.getBatchSize(); x++) {
+                    batch.push({
                         x: bytes[b] * PIECE_SIZE,
                         y: bytes[b + 1] * PIECE_SIZE,
-                        isDrawn: false,
                     });
                     b += 2;
                 }
-            }, 1);
+
+                count = batch.length;
+                // 1s/60calls = 0.0167 seconds per call
+            }, 16.6667);
 
             s.background(0);
-            s.fill(255);
         };
 
         s.draw = () => {
-            // TODO: is it possible to draw in batches instead of looping through all the items?
-            for (let item of items) {
-                if (item.isDrawn) continue;
+            // FIXME: why does it look so weird on my monitor's screen?
+            for (let item of batch) {
+                // if (item.isDrawn) continue;
                 s.fill(255);
                 s.rect(item.x, item.y, PIECE_SIZE, PIECE_SIZE);
-                item.isDrawn = true;
+                count = Math.max(count - 1, 0);
             }
         };
     }, canvasId);

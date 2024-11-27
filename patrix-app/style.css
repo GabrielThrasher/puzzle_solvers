@@ -101,10 +101,19 @@ button:focus-visible {
 }
 
 #controls-area {
+    position: relative;
     display: flex;
     justify-content: center;
+    align-items: center;
     margin-top: 1em;
     font-size: 1.6em;
+}
+
+#speed {
+    position: absolute;
+    left: 65%;
+}
+#speed-state {
 }
 
 .control-btn {
