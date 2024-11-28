@@ -5,9 +5,9 @@
 #include <unordered_map>
 #include <unordered_set>
 using namespace std;
+#include <chrono>
 
-using EdgeMap = unordered_map<int, unordered_set<PuzzlePiece *>>;
-using ColorMap = unordered_map<int, unordered_set<PuzzlePiece *>>;
+using StorageMap = unordered_map<int, unordered_set<PuzzlePiece>>;
 
 class Puzzle {
     // Puzzle properties
@@ -17,40 +17,44 @@ class Puzzle {
     int flatEdge = 44444444; // Octal value for a flat edge
 
     // underlying 2D 8x8 matrix of the puzzle
-    vector<vector<PuzzlePiece *>> puzzle;
+    vector<vector<PuzzlePiece*>> puzzle;
 
     // Storage by edge
-    EdgeMap topEdges;
-    EdgeMap bottomEdges;
-    EdgeMap leftEdges;
-    EdgeMap rightEdges;
+    StorageMap topEdges;
+    StorageMap bottomEdges;
+    StorageMap leftEdges;
+    StorageMap rightEdges;
 
     // Storage by quadrant color
-    ColorMap topLeftQuadColors;
-    ColorMap topRightQuadColors;
-    ColorMap bottomLeftQuadColors;
-    ColorMap bottomRightQuadColors;
+    StorageMap topLeftQuadColors;
+    StorageMap topRightQuadColors;
+    StorageMap bottomLeftQuadColors;
+    StorageMap bottomRightQuadColors;
 
     void addEdges(int row, int col, PuzzlePiece *piece);
     void addColor(int row, int col, PuzzlePiece *piece, cv::Mat &rgbMatrix);
 
-    int getUniqueEdge(EdgeMap &map);
+    int getUniqueEdge(StorageMap &map);
     int getEdge();
     int getComplementEdge(int num);
 
-    void updatePuzzleStorageMaps(PuzzlePiece *piece);
+    void updatePuzzleStorageMaps(PuzzlePiece* piecePtr);
     void printPuzzleStorageMapsSize();
     int hashRGBValues(tuple<int, int, int> rgb);
 
     bool isValidColorIdx(int row, int col);
     bool isValidMatirxIdx(int row, int col);
 
+    void savePuzzleStorageMap(string file, StorageMap& map);
+    void loadPuzzleStorageMap(string file, StorageMap& map);
 
   public:
     Puzzle();
 
-    void generateFromImage(string imagePath);
+    void generate(string imagePath);
     void EdgeAlgorithm();
+    void save();
+    void load();
 };
 
 

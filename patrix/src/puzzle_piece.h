@@ -8,21 +8,26 @@ using namespace std;
 
 class PuzzlePiece {
   public:
-    vector<vector<tuple<int, int, int>>> colors;
-
     int col;
     int row;
 
-    // edges
+    // Edges
     int top;
-    int bottom;
     int left;
+    int bottom;
     int right;
 
+    // Colors
+    vector<vector<tuple<int, int, int>>> colors;
+
+    PuzzlePiece();
     PuzzlePiece(int row, int col, int pieceSize);
 
     void initColor(int pixelResPerPiece);
     bool operator==(const PuzzlePiece &other) const;
+
+    void write(std::ofstream& out) const;
+    int read(const std::vector<char>& buffer, int offset);
 };
 
 // Hash function for (unordered) sets and (unordered) maps' keys
@@ -32,4 +37,4 @@ template <> struct hash<PuzzlePiece> {
         return hash<int>()(piece.row) ^ hash<int>()(piece.col);
     }
 };
-} // namespace std
+}
