@@ -29,7 +29,7 @@ iex ((New-Object System.Net.WebClient).DownloadString('https://community.chocola
 11. Click "OK" then under "System variables" for each of the following variables listed below, click on "New" add the variable name (chars before |) and add the variable value (chars after |) and click "OK" (again, verify that the numbers after vc are correct for you):
     - OPENCV_DIR | C:\tools\opencv\build\x64\vc16\lib
     - OPENCV_INCLUDE_PATHS | C:\tools\opencv\build\include
-    - OPENCV_LINK_LIBS | opencv_world460
+    - OPENCV_LINK_LIBS | opencv_world4100
     - OPENCV_LINK_PATHS | C:\tools\opencv\build\x64\vc16\lib
     - OPENCV_PATH | C:\tools\opencv
 12. Click on "OK" and then click on "OK" again. Restart your computer for the changes to fully take effect.
