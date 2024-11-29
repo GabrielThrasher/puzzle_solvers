@@ -4,6 +4,7 @@
 #include <string>
 #include <unordered_map>
 #include <unordered_set>
+#include <chrono>
 using namespace std;
 
 using EdgeMap = unordered_map<int, unordered_set<PuzzlePiece *>>;
@@ -45,12 +46,14 @@ class Puzzle {
     bool isValidColorIdx(int row, int col);
     bool isValidMatirxIdx(int row, int col);
 
+    void WriteToFile(PuzzlePiece* element, ofstream& file);
 
   public:
     Puzzle();
 
     void generateFromImage(string imagePath);
-    void EdgeAlgorithm();
+    void EdgeAlgorithm(string filename);
+
 };
 
 

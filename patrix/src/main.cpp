@@ -6,5 +6,5 @@ int main() {
     Puzzle puzzle;
     puzzle.generateFromImage("images/black.png");
 
-    puzzle.EdgeAlgorithm();
+    puzzle.EdgeAlgorithm("example.bin");
 }
