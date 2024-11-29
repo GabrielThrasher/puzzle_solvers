@@ -53,6 +53,7 @@ class Puzzle {
 
     void generateFromImage(string imagePath);
     void EdgeAlgorithm(string filename);
+    void ColorAlgorithm(string filename);
 
 };
 

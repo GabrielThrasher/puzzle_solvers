@@ -257,7 +257,7 @@ void Puzzle::WriteToFile(PuzzlePiece *element, ofstream& file) {
 }
 
 void Puzzle::EdgeAlgorithm(string filename) {
-    //auto timeInit = chrono::system_clock::now();
+    auto timeInit = chrono::system_clock::now();
 
     ofstream file(filename, ios::binary);
 
@@ -367,11 +367,39 @@ void Puzzle::EdgeAlgorithm(string filename) {
         //Write to file location + rgb values
         WriteToFile(*element, file);
     }
-    //auto timeFinal = chrono::system_clock::now();
-    //auto duration = timeFinal - timeInit;
+    auto timeFinal = chrono::system_clock::now();
+    auto duration = timeFinal - timeInit;
 
-    //cout << chrono::duration_cast<chrono::seconds>(duration).count() << endl;
+    cout << chrono::duration_cast<chrono::milliseconds>(duration).count() << endl;
     file.close();
+
+}
+
+void Puzzle::ColorAlgorithm(string filename) {
+    random_device rd;
+    unsigned long seed = rd();
+    mt19937 gen(seed);
+
+    //Randomly select map
+    vector<EdgeMap> mapSelection = {topEdges, bottomEdges, leftEdges, rightEdges};
+    int randomIdx = rand() % mapSelection.size();
+    const auto& randomMap = mapSelection[randomIdx];
+
+    //Randomly select key
+    randomIdx = rand() % randomMap.size();
+    auto it = randomMap.begin();
+    advance(it, randomIdx);
+
+    //Randomly select PuzzlePiece from set
+    randomIdx = rand() % it->second.size();
+    auto iter = it->second.begin();
+    advance(iter, randomIdx);
+    //Now we have a random PuzzlePiece object
+
+
+
+
+
 
 }
 
