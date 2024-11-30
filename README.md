@@ -41,7 +41,7 @@ OpenCV helped us get the RGB colors of each pixel in an image for puzzle. So, yo
 6. Click on "Environment Variables" that's on the bottom right of the pop up app.
 7. Under "User variables for {folder name on your computer}", click on "Path" and then "Edit".
 8. Delete any instance of OpenCV in preparation for for the new addition.
-9. Click on "New", add the following path -- assuming that OpenCV was installed in the default place, which it should be if you followed Steps 3 and 4 (_NOTE_: the numbers after vc might be different -- first see if they are different and then update the path accordingly) -- then click enter: `C:\tools\opencv\build\x64\vc16\bin`
+9. Click on "New", add the following path, `C:\tools\opencv\build\x64\vc16\bin` -- assuming that OpenCV was installed in the default place, which it should be if you followed Steps 3 and 4 (_NOTE_: the numbers after vc might be different -- first see if they are different and then update the path accordingly) -- then click enter.
 10. Click "OK" then under "System variables" for each of the following variables listed below, click on "New" add the variable name (chars before |) and add the variable value (chars after |) and click "OK" (again, verify that the numbers after vc are correct for you):
     - `OPENCV_DIR` | `C:\tools\opencv\build\x64\vc16\lib`
     - `OPENCV_INCLUDE_PATHS` | `C:\tools\opencv\build\include`
