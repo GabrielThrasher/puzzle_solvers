@@ -243,17 +243,23 @@ bool Puzzle::isValidMatirxIdx(int row, int col) {
     return ((row >= 0 || col >= 0) && (row < pieceSize || col < pieceSize));
 }
 
-void Puzzle::WriteToFile(PuzzlePiece *element, ofstream& file) {
-    file.write(reinterpret_cast<const char*>(&element->row), sizeof(element->row));
-    file.write(reinterpret_cast<const char*>(&element->col), sizeof(element->col));
-    for (int i = 1; i < (element->colors).size()-1; i++) {
-        for (int j = 1; j < (element->colors[0]).size()-1; j++) {
-            file.write(reinterpret_cast<const char *>(&get<0>((element->colors)[i][j])), sizeof(get<0>((element->colors)[i][j])));
-            file.write(reinterpret_cast<const char *>(&get<1>((element->colors)[i][j])), sizeof(get<0>((element->colors)[i][j])));
-            file.write(reinterpret_cast<const char *>(&get<2>((element->colors)[i][j])), sizeof(get<0>((element->colors)[i][j])));
+void Puzzle::WriteToFile(PuzzlePiece *element, ofstream &file) {
+    file.write(reinterpret_cast<const char *>(&element->row), 2);
+    file.write(reinterpret_cast<const char *>(&element->col), 2);
+
+    for (int i = 1; i < (element->colors).size() - 1; i++) {
+        for (int j = 1; j < (element->colors[0]).size() - 1; j++) {
+            file.write(reinterpret_cast<const char *>(
+                           &get<0>((element->colors)[i][j])),
+                       2);
+            file.write(reinterpret_cast<const char *>(
+                           &get<1>((element->colors)[i][j])),
+                       2);
+            file.write(reinterpret_cast<const char *>(
+                           &get<2>((element->colors)[i][j])),
+                       2);
         }
     }
-
 }
 
 void Puzzle::EdgeAlgorithm(string filename) {
@@ -261,7 +267,7 @@ void Puzzle::EdgeAlgorithm(string filename) {
 
     ofstream file(filename, ios::binary);
 
-    //This will fetch top left corner piece first
+    // This will fetch top left corner piece first
     int complement;
     int leftIdx = 0;
     int rightIdx = cols;
@@ -272,21 +278,21 @@ void Puzzle::EdgeAlgorithm(string filename) {
     bool isOdd = false;
 
     if (rows % 2 == 0) {
-        counter = rows/2;
-    }
-    else {
-        counter = (rows-1)/2;
+        counter = rows / 2;
+    } else {
+        counter = (rows - 1) / 2;
         isOdd = true;
     }
 
-    while(counter > 0) {
+    while (counter > 0) {
         for (int i = leftIdx; i < rightIdx; i++) {
             if (isStarting) {
-                //Locate top left corner piece
-                for (auto element: topEdges[flatEdge]) {
-                    if (leftEdges[flatEdge].find(element) != leftEdges[flatEdge].end()) {
-                        //Row Column R G B
-                        //Write to file location + rgb values
+                // Locate top left corner piece
+                for (auto element : topEdges[flatEdge]) {
+                    if (leftEdges[flatEdge].find(element) !=
+                        leftEdges[flatEdge].end()) {
+                        // Row Column R G B
+                        // Write to file location + rgb values
                         WriteToFile(element, file);
 
                         complement = getComplementEdge(element->right);
@@ -295,61 +301,67 @@ void Puzzle::EdgeAlgorithm(string filename) {
                 }
                 continue;
             }
-            //Index leftEdges map with the complement
+            // Index leftEdges map with the complement
             auto leftSet = leftEdges[complement];
             auto element = leftSet.begin();
 
-            //Write to file location + rgb values
+            // Write to file location + rgb values
             WriteToFile(*element, file);
 
             complement = getComplementEdge((*element)->right);
             if (i == rightIdx - 1) {
-                //Get the complement of the bottom edge to prepare for top to down portion of algorithm
+                // Get the complement of the bottom edge to prepare for top to
+                // down portion of algorithm
                 complement = getComplementEdge((*element)->bottom);
             }
         }
 
-        //Start at row = 1
+        // Start at row = 1
         for (int i = topIdx; i < bottomIdx; i++) {
-            //Index topEdges map with the complement-> returns set of all possible pieces
+            // Index topEdges map with the complement-> returns set of all
+            // possible pieces
             auto topSet = topEdges[complement];
             auto element = topSet.begin();
-            //Write to file location + rgb values
+            // Write to file location + rgb values
             WriteToFile(*element, file);
 
             complement = getComplementEdge((*element)->bottom);
             if (i == bottomIdx - 1) {
-                //Get complement of left edge to prepare for right to left portion of algorithm
+                // Get complement of left edge to prepare for right to left
+                // portion of algorithm
                 complement = getComplementEdge((*element)->left);
             }
         }
 
-        //Start at col = 315
+        // Start at col = 315
         for (int i = rightIdx - 2; i >= leftIdx; i--) {
-            //Index rightEdges map with the complement
+            // Index rightEdges map with the complement
             auto rightSet = rightEdges[complement];
             auto element = rightSet.begin();
-            //Write to file location + rgb values
+            // Write to file location + rgb values
             WriteToFile(*element, file);
 
             complement = getComplementEdge((*element)->left);
             if (i == leftIdx) {
-                //Get complement of top edge to prepare for bottom to top portion of algorithm
+                // Get complement of top edge to prepare for bottom to top
+                // portion of algorithm
                 complement = getComplementEdge((*element)->top);
             }
         }
 
-        //Start at row = 315
+        // Start at row = 315
         for (int i = bottomIdx - 2; i >= topIdx; i--) {
-            //Index bottomEdges map with the complement-> returns set of all possible pieces
+            // Index bottomEdges map with the complement-> returns set of all
+            // possible pieces
             auto bottomSet = bottomEdges[complement];
             auto element = bottomSet.begin();
-            //Write to file location + rgb values
+            // Write to file location + rgb values
             WriteToFile(*element, file);
 
             complement = getComplementEdge((*element)->top);
             if (i == topIdx) {
-                //Get complement of right edge to prepare for another left to right portion of algorithm
+                // Get complement of right edge to prepare for another left to
+                // right portion of algorithm
                 complement = getComplementEdge((*element)->right);
             }
         }
@@ -364,40 +376,43 @@ void Puzzle::EdgeAlgorithm(string filename) {
     if (isOdd) {
         auto lastSet = leftEdges[complement];
         auto element = lastSet.begin();
-        //Write to file location + rgb values
+        // Write to file location + rgb values
         WriteToFile(*element, file);
     }
     auto timeFinal = chrono::system_clock::now();
     auto duration = timeFinal - timeInit;
+    auto time =
+        (int)chrono::duration_cast<chrono::milliseconds>(duration).count();
 
-    cout << chrono::duration_cast<chrono::milliseconds>(duration).count() << endl;
+    file.write(reinterpret_cast<const char *>(&time), 2);
     file.close();
-
 }
 
-//meep
+// meep
 void Puzzle::ColorAlgorithm(string filename) {
     ofstream file(filename, ios::binary);
     random_device rd;
     unsigned long seed = rd();
     mt19937 gen(seed);
 
-    //Randomly select map
-    vector<EdgeMap> mapSelection = {topEdges, bottomEdges, leftEdges, rightEdges};
+    // Randomly select map
+    vector<EdgeMap> mapSelection = {topEdges, bottomEdges, leftEdges,
+                                    rightEdges};
     int randomIdx = rand() % mapSelection.size();
-    const auto& randomMap = mapSelection[randomIdx];
+    const auto &randomMap = mapSelection[randomIdx];
 
-    vector<string> vect = {"topEdges", "bottomEdges", "leftEdges", "rightEdges"};
+    vector<string> vect = {"topEdges", "bottomEdges", "leftEdges",
+                           "rightEdges"};
     string mapType = vect[randomIdx];
 
-    //Randomly select key
+    // Randomly select key
     randomIdx = rand() % randomMap.size();
     auto it = randomMap.begin();
     advance(it, randomIdx);
 
-    //Make sure we don't select a flat edge key
+    // Make sure we don't select a flat edge key
     if (it->first == flatEdge) {
-        while(it->first == flatEdge) {
+        while (it->first == flatEdge) {
             randomIdx = rand() % randomMap.size();
             it = randomMap.begin();
             advance(it, randomIdx);
@@ -405,19 +420,20 @@ void Puzzle::ColorAlgorithm(string filename) {
     }
 
     int edgeValue;
-    PuzzlePiece* piece = *it->second.begin();
+    PuzzlePiece *piece = *it->second.begin();
     vector<tuple<int, int, int>> rgbVect;
     vector<vector<tuple<int, int, int>>> colorMatrix = piece->colors;
     vector<int> hashedRGB;
 
     bool potentiallyExpandColorCluster = true;
 
-    //Now we have a random PuzzlePiece object: Proceed to get edge
+    // Now we have a random PuzzlePiece object: Proceed to get edge
 
-    /*ADD: We need to check all exterior edges of the color cluster to verify that you cannot add another piece to it
-    before flipping the boolean value to false */
+    /*ADD: We need to check all exterior edges of the color cluster to verify
+    that you cannot add another piece to it before flipping the boolean value to
+    false */
 
-    while(potentiallyExpandColorCluster) {
+    while (potentiallyExpandColorCluster) {
         if (mapType == "topEdges") {
             edgeValue = piece->top;
             for (int i = 1; i < colorMatrix[0].size() - 1; i++) {
@@ -429,25 +445,24 @@ void Puzzle::ColorAlgorithm(string filename) {
             auto set1 = bottomLeftQuadColors[hashedRGB[0]];
             auto set2 = bottomRightQuadColors[hashedRGB[1]];
 
-            //Create a temporary set to store the intersection
+            // Create a temporary set to store the intersection
             set<PuzzlePiece *> intersection;
 
-            //Use set_intersection
-            set_intersection(set1.begin(), set1.end(),
-                             set2.begin(), set2.end(),
+            // Use set_intersection
+            set_intersection(set1.begin(), set1.end(), set2.begin(), set2.end(),
                              inserter(intersection, intersection.begin()));
 
             int complement = getComplementEdge(piece->top);
-            for (const auto &elem: intersection) {
+            for (const auto &elem : intersection) {
                 if (complement == elem->bottom) {
-                    //Write to file
-
+                    // Write to file
                 }
             }
 
         } else if (mapType == "bottomEdges") {
             edgeValue = piece->bottom;
-            for (int i = 1; i < colorMatrix[colorMatrix.size() - 1].size() - 1; i++) {
+            for (int i = 1; i < colorMatrix[colorMatrix.size() - 1].size() - 1;
+                 i++) {
                 rgbVect.push_back(colorMatrix[colorMatrix.size() - 1][i]);
             }
 
@@ -469,10 +484,6 @@ void Puzzle::ColorAlgorithm(string filename) {
             }
             topLeftQuadColors;
             bottomLeftQuadColors;
-
         }
     }
-
 }
-
-
