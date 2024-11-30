@@ -14,17 +14,29 @@
                     faster at solving the same 100,000-piece puzzle?
                 </p>
                 <button id="start-btn">start 🚀</button>
+                <div id="canvas-labels">
+                    <p class="label">Edge Algorithm</p>
+                    <p class="label">Color Algorithm</p>
+                </div>
                 <div id="visualization-area">
                     <div id="canvas1" class="puzzle-canvas"></div>
                     <div id="canvas2" class="puzzle-canvas"></div>
+                    <div id="duration">
+                        <span id="edge-duration"
+                            >Duration: <span id="edge-duration-txt"></span
+                        ></span>
+                        <span id="color-duration"
+                            >Duration: <span id="color-duration-txt"></span
+                        ></span>
+                    </div>
                 </div>
                 <div id="controls-area">
                     <div class="control-btn" id="slow-btn">⏪</div>
                     <div class="control-btn" id="pause-btn">⏸️</div>
                     <div class="control-btn" id="fast-btn">️⏩</div>
-                    <div id="speed">
-                        Speed: <span id="speed-state">Normal</span>
-                    </div>
+                </div>
+                <div id="speed">
+                    Speed: <span id="speed-state">Normal</span>
                 </div>
             </div>
         </div>

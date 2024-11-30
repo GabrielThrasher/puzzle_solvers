@@ -4,7 +4,7 @@ export async function startPuzzle() {
     try {
         const [edgeResponse, colorResponse] = await Promise.all([
             fetch("http://127.0.0.1:8000/puzzle-edge"),
-            fetch("http://127.0.0.1:8000/puzzle-color"),
+            fetch("http://127.0.0.1:8000/puzzle-edge"),
         ]);
 
         if (!edgeResponse.ok || !colorResponse.ok) {
@@ -20,9 +20,17 @@ export async function startPuzzle() {
     }
 }
 
+const times = {
+    edge: null,
+    color: null,
+};
+
 export function renderPuzzle(edgeData, colorData) {
     const edgeDataBytes = new Uint16Array(edgeData);
     const colorDataBytes = new Uint16Array(colorData);
+
+    times.edge = edgeDataBytes[edgeDataBytes.length - 1];
+    times.color = colorDataBytes[colorDataBytes.length - 1];
 
     renderCanvas(edgeDataBytes, "canvas1");
     renderCanvas(colorDataBytes, "canvas2");
@@ -49,6 +57,7 @@ function renderCanvas(bytes, canvasId) {
             let c = setInterval(() => {
                 // stop once we've read all of the bytes
                 if (b >= bytes.length) {
+                    puzzleFinishedHanlder();
                     clearInterval(c);
                     return;
                 }
@@ -123,4 +132,14 @@ function renderCanvas(bytes, canvasId) {
             }
         };
     }, canvasId);
+}
+
+function puzzleFinishedHanlder() {
+    const durationContainer = document.getElementById("duration");
+    const edgeDuration = document.getElementById("edge-duration-txt");
+    const colorDuration = document.getElementById("color-duration-txt");
+
+    durationContainer.style.display = "flex";
+    edgeDuration.innerText = `${times.edge / 1000} seconds`;
+    colorDuration.innerText = `${times.color / 1000} seconds`;
 }

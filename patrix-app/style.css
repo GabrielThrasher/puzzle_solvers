@@ -86,9 +86,32 @@ button:focus-visible {
     margin: 1em 0;
 }
 
+#canvas-labels {
+    display: flex;
+    justify-content: space-between;
+    margin-top: -50px;
+}
+
+.label {
+    font-size: 1.3rem;
+}
 #visualization-area {
     display: flex;
     justify-content: center;
+    position: relative;
+}
+
+#duration {
+    display: none;
+    width: 99.5%;
+    justify-content: space-around;
+    position: absolute;
+    bottom: -7%;
+    font-size: 1.5em;
+}
+
+#edge-duration {
+    margin-right: 200px;
 }
 
 .puzzle-canvas {
@@ -98,6 +121,7 @@ button:focus-visible {
     border: 1px gray solid;
     width: 634px;
     height: 634px;
+    margin: 0 5px;
 }
 
 #controls-area {
@@ -110,8 +134,8 @@ button:focus-visible {
 }
 
 #speed {
-    position: absolute;
-    left: 65%;
+    padding: 15px 0;
+    font-size: 1.5em;
 }
 #speed-state {
 }
