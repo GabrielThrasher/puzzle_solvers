@@ -375,6 +375,7 @@ void Puzzle::EdgeAlgorithm(string filename) {
 
 }
 
+//meep
 void Puzzle::ColorAlgorithm(string filename) {
     ofstream file(filename, ios::binary);
     random_device rd;
