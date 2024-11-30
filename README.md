@@ -7,7 +7,7 @@ An edge algorithm or a color algorithm -- which one is faster at solving the sam
 
 We highly recommend the following while running the code as that is what it has been proven to work on:
 
--   IDE/Code Editor: Visual Studio (VS) Code and Clion
+-   IDE/Code Editor: Visual Studio (VS) Code and CLion
 -   Complier: Visual Studio complier (which means you'll need Visual Studio + the "Desktop development with C++ workload" extension downloaded on your computer)
 
 # How to Run
