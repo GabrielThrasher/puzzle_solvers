@@ -376,6 +376,7 @@ void Puzzle::EdgeAlgorithm(string filename) {
 }
 
 void Puzzle::ColorAlgorithm(string filename) {
+    ofstream file(filename, ios::binary);
     random_device rd;
     unsigned long seed = rd();
     mt19937 gen(seed);
@@ -385,21 +386,91 @@ void Puzzle::ColorAlgorithm(string filename) {
     int randomIdx = rand() % mapSelection.size();
     const auto& randomMap = mapSelection[randomIdx];
 
+    vector<string> vect = {"topEdges", "bottomEdges", "leftEdges", "rightEdges"};
+    string mapType = vect[randomIdx];
+
     //Randomly select key
     randomIdx = rand() % randomMap.size();
     auto it = randomMap.begin();
     advance(it, randomIdx);
 
-    //Randomly select PuzzlePiece from set
-    randomIdx = rand() % it->second.size();
-    auto iter = it->second.begin();
-    advance(iter, randomIdx);
-    //Now we have a random PuzzlePiece object
+    //Make sure we don't select a flat edge key
+    if (it->first == flatEdge) {
+        while(it->first == flatEdge) {
+            randomIdx = rand() % randomMap.size();
+            it = randomMap.begin();
+            advance(it, randomIdx);
+        }
+    }
 
+    int edgeValue;
+    PuzzlePiece* piece = *it->second.begin();
+    vector<tuple<int, int, int>> rgbVect;
+    vector<vector<tuple<int, int, int>>> colorMatrix = piece->colors;
+    vector<int> hashedRGB;
 
+    bool potentiallyExpandColorCluster = true;
 
+    //Now we have a random PuzzlePiece object: Proceed to get edge
 
+    /*ADD: We need to check all exterior edges of the color cluster to verify that you cannot add another piece to it
+    before flipping the boolean value to false */
 
+    while(potentiallyExpandColorCluster) {
+        if (mapType == "topEdges") {
+            edgeValue = piece->top;
+            for (int i = 1; i < colorMatrix[0].size() - 1; i++) {
+                rgbVect.push_back(colorMatrix[0][i]);
+            }
+            for (int i = 0; i < rgbVect.size(); i++) {
+                hashedRGB.push_back(hashRGBValues(rgbVect[i]));
+            }
+            auto set1 = bottomLeftQuadColors[hashedRGB[0]];
+            auto set2 = bottomRightQuadColors[hashedRGB[1]];
+
+            //Create a temporary set to store the intersection
+            set<PuzzlePiece *> intersection;
+
+            //Use set_intersection
+            set_intersection(set1.begin(), set1.end(),
+                             set2.begin(), set2.end(),
+                             inserter(intersection, intersection.begin()));
+
+            int complement = getComplementEdge(piece->top);
+            for (const auto &elem: intersection) {
+                if (complement == elem->bottom) {
+                    //Write to file
+
+                }
+            }
+
+        } else if (mapType == "bottomEdges") {
+            edgeValue = piece->bottom;
+            for (int i = 1; i < colorMatrix[colorMatrix.size() - 1].size() - 1; i++) {
+                rgbVect.push_back(colorMatrix[colorMatrix.size() - 1][i]);
+            }
+
+            topLeftQuadColors;
+            topRightQuadColors;
+
+        } else if (mapType == "leftEdges") {
+            edgeValue = piece->left;
+            for (int i = 1; i < colorMatrix.size() - 1; i++) {
+                rgbVect.push_back(colorMatrix[i][0]);
+            }
+            topRightQuadColors;
+            bottomRightQuadColors;
+
+        } else if (mapType == "rightEdges") {
+            edgeValue = piece->right;
+            for (int i = 1; i < colorMatrix.size() - 1; i++) {
+                rgbVect.push_back(colorMatrix[i][3]);
+            }
+            topLeftQuadColors;
+            bottomLeftQuadColors;
+
+        }
+    }
 
 }
 
