@@ -388,102 +388,123 @@ void Puzzle::EdgeAlgorithm(string filename) {
     file.close();
 }
 
-// meep
+
 void Puzzle::ColorAlgorithm(string filename) {
+    //Set up random
     ofstream file(filename, ios::binary);
-    random_device rd;
-    unsigned long seed = rd();
-    mt19937 gen(seed);
 
-    // Randomly select map
-    vector<EdgeMap> mapSelection = {topEdges, bottomEdges, leftEdges,
-                                    rightEdges};
-    int randomIdx = rand() % mapSelection.size();
-    const auto &randomMap = mapSelection[randomIdx];
+    unordered_set<PuzzlePiece*> set1;
+    unordered_set<PuzzlePiece*> set2;
 
-    vector<string> vect = {"topEdges", "bottomEdges", "leftEdges",
-                           "rightEdges"};
-    string mapType = vect[randomIdx];
-
-    // Randomly select key
-    randomIdx = rand() % randomMap.size();
-    auto it = randomMap.begin();
-    advance(it, randomIdx);
-
-    // Make sure we don't select a flat edge key
-    if (it->first == flatEdge) {
-        while (it->first == flatEdge) {
-            randomIdx = rand() % randomMap.size();
-            it = randomMap.begin();
-            advance(it, randomIdx);
-        }
-    }
-
+    unordered_set<PuzzlePiece> SolvedPuzzlePieces;
+    unordered_set<PuzzlePiece> PiecesInColorCluster;
+    queue<PuzzlePiece> NewPieceQueue;
+    int numPiecesSolved = 0;
+    int randomIdx;
     int edgeValue;
-    PuzzlePiece *piece = *it->second.begin();
-    vector<tuple<int, int, int>> rgbVect;
-    vector<vector<tuple<int, int, int>>> colorMatrix = piece->colors;
-    vector<int> hashedRGB;
 
-    bool potentiallyExpandColorCluster = true;
+    while(numPiecesSolved <= rows*cols) {
+        cout << "Starting new color cluster..." << endl;
+        cout << "NumPieces: " << numPiecesSolved << endl;
 
-    // Now we have a random PuzzlePiece object: Proceed to get edge
+        // Randomly select key
+        randomIdx = rand() % topEdges.size();
+        auto it = topEdges.begin();
+        advance(it, randomIdx);
 
-    /*ADD: We need to check all exterior edges of the color cluster to verify
-    that you cannot add another piece to it before flipping the boolean value to
-    false */
-
-    while (potentiallyExpandColorCluster) {
-        if (mapType == "topEdges") {
-            edgeValue = piece->top;
-            for (int i = 1; i < colorMatrix[0].size() - 1; i++) {
-                rgbVect.push_back(colorMatrix[0][i]);
-            }
-            for (int i = 0; i < rgbVect.size(); i++) {
-                hashedRGB.push_back(hashRGBValues(rgbVect[i]));
-            }
-            auto set1 = bottomLeftQuadColors[hashedRGB[0]];
-            auto set2 = bottomRightQuadColors[hashedRGB[1]];
-
-            // Create a temporary set to store the intersection
-            set<PuzzlePiece *> intersection;
-
-            // Use set_intersection
-            set_intersection(set1.begin(), set1.end(), set2.begin(), set2.end(),
-                             inserter(intersection, intersection.begin()));
-
-            int complement = getComplementEdge(piece->top);
-            for (const auto &elem : intersection) {
-                if (complement == elem->bottom) {
-                    // Write to file
-                }
-            }
-
-        } else if (mapType == "bottomEdges") {
-            edgeValue = piece->bottom;
-            for (int i = 1; i < colorMatrix[colorMatrix.size() - 1].size() - 1;
-                 i++) {
-                rgbVect.push_back(colorMatrix[colorMatrix.size() - 1][i]);
-            }
-
-            topLeftQuadColors;
-            topRightQuadColors;
-
-        } else if (mapType == "leftEdges") {
-            edgeValue = piece->left;
-            for (int i = 1; i < colorMatrix.size() - 1; i++) {
-                rgbVect.push_back(colorMatrix[i][0]);
-            }
-            topRightQuadColors;
-            bottomRightQuadColors;
-
-        } else if (mapType == "rightEdges") {
-            edgeValue = piece->right;
-            for (int i = 1; i < colorMatrix.size() - 1; i++) {
-                rgbVect.push_back(colorMatrix[i][3]);
-            }
-            topLeftQuadColors;
-            bottomLeftQuadColors;
+        PuzzlePiece* initPiece = *it->second.begin();
+        while(SolvedPuzzlePieces.find(*initPiece) != SolvedPuzzlePieces.end()) {
+            randomIdx = rand() % topEdges.size();
+            it = topEdges.begin();
+            advance(it, randomIdx);
+            initPiece = *it->second.begin();
         }
+
+        SolvedPuzzlePieces.insert(*initPiece);
+
+        vector<vector<tuple<int, int, int>>> colorMatrix = initPiece->colors;
+        vector<int> hashedRGB;
+        WriteToFile(initPiece, file);
+
+        NewPieceQueue.push(*initPiece);
+
+        while (!NewPieceQueue.empty()) {
+            //cout << "Queue size: " << NewPieceQueue.size() << endl;
+            PuzzlePiece piece = NewPieceQueue.front();
+            //PiecesInColorCluster.insert(piece);
+            NewPieceQueue.pop();
+            numPiecesSolved++;
+
+            vector<int> vect = {piece.top, piece.bottom, piece.left, piece.right};
+
+            for (int i = 0; i < vect.size(); i++) {
+                edgeValue = vect[i];
+
+                //We want to avoid flat edges as the cluster will not expand in the direction of the flat edge
+                if (edgeValue == flatEdge) {
+                    continue;
+                }
+
+                //If 0th index: piece->top
+                if (i == 0) {
+                    for (int j = 1; j < colorMatrix[0].size() - 1; j++) {
+                        hashedRGB.push_back(hashRGBValues(colorMatrix[0][j]));
+                    }
+                    set1 = bottomLeftQuadColors[hashedRGB[0]];
+                    set2 = bottomRightQuadColors[hashedRGB[1]];
+                }
+                //If 1st index: piece->bottom
+                if (i == 1) {
+                    for (int j = 1; j < colorMatrix[colorMatrix.size() - 1].size() - 1; j++) {
+                        hashedRGB.push_back(hashRGBValues(colorMatrix[colorMatrix.size() - 1][j]));
+                    }
+                    set1 = topLeftQuadColors[hashedRGB[0]];
+                    set2 = topRightQuadColors[hashedRGB[1]];
+                }
+
+                //If 2nd index: piece->left
+                if (i == 2) {
+                    for (int j = 1; j < colorMatrix.size() - 1; j++) {
+                        hashedRGB.push_back(hashRGBValues(colorMatrix[j][0]));
+                    }
+                    set1 = topRightQuadColors[hashedRGB[0]];
+                    set2 = bottomRightQuadColors[hashedRGB[1]];
+                }
+
+                //If 3rd index: piece->right
+                if (i == 3) {
+                    for (int j = 1; j < colorMatrix.size() - 1; j++) {
+                        hashedRGB.push_back(hashRGBValues(colorMatrix[j][colorMatrix.size() - 1]));
+                    }
+                    set1 = topLeftQuadColors[hashedRGB[0]];
+                    set2 = bottomLeftQuadColors[hashedRGB[1]];
+                }
+
+
+                int complement = getComplementEdge(edgeValue);
+                for (auto newPiece: set1) {
+                    if (set2.find(newPiece) != set2.end()) {
+                        vector<int> newPieceEdges = {newPiece->top, newPiece->bottom, newPiece->left, newPiece->right};
+                        for (int k = 0; k < newPieceEdges.size(); k++) {
+                            if (complement == newPieceEdges[k]) {
+                                //Write new piece to file
+                                WriteToFile(newPiece, file);
+                                if (PiecesInColorCluster.find(*newPiece) == PiecesInColorCluster.end()) {
+                                    NewPieceQueue.push(*newPiece);
+                                    SolvedPuzzlePieces.insert(*newPiece);
+                                    PiecesInColorCluster.insert(*newPiece);
+
+                                }
+                            }
+                        }
+
+                    }
+                }
+
+                hashedRGB.clear();
+            }
+        }
+        PiecesInColorCluster.clear();
     }
+    cout << "Num Pieces Solved: " << numPiecesSolved << endl;
 }
