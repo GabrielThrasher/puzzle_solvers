@@ -21,7 +21,6 @@ export async function startPuzzle() {
 }
 
 export function renderPuzzle(edgeData, colorData) {
-    // TODO: it won't be 2 bytes each
     const edgeDataBytes = new Uint16Array(edgeData);
     const colorDataBytes = new Uint16Array(colorData);
 
@@ -61,26 +60,65 @@ function renderCanvas(bytes, canvasId) {
                 if (settings.paused) return;
 
                 for (let x = 0; x < settings.getBatchSize(); x++) {
+                    // top left
                     batch.push({
-                        x: bytes[b] * PIECE_SIZE,
-                        y: bytes[b + 1] * PIECE_SIZE,
+                        y: bytes[b] * PIECE_SIZE,
+                        x: bytes[b + 1] * PIECE_SIZE,
+                        color: {
+                            red: bytes[b + 2],
+                            green: bytes[b + 3],
+                            blue: bytes[b + 4],
+                        },
                     });
-                    b += 2;
+
+                    // top right
+                    batch.push({
+                        y: bytes[b] * PIECE_SIZE,
+                        x: bytes[b + 1] * PIECE_SIZE + 1,
+                        color: {
+                            red: bytes[b + 5],
+                            green: bytes[b + 6],
+                            blue: bytes[b + 7],
+                        },
+                    });
+
+                    // bottom right
+                    batch.push({
+                        y: bytes[b] * PIECE_SIZE + 1,
+                        x: bytes[b + 1] * PIECE_SIZE + 1,
+                        color: {
+                            red: bytes[b + 8],
+                            green: bytes[b + 9],
+                            blue: bytes[b + 10],
+                        },
+                    });
+
+                    // bottom left
+                    batch.push({
+                        y: bytes[b] * PIECE_SIZE + 1,
+                        x: bytes[b + 1] * PIECE_SIZE,
+                        color: {
+                            red: bytes[b + 11],
+                            green: bytes[b + 12],
+                            blue: bytes[b + 13],
+                        },
+                    });
+
+                    b += 14;
                 }
 
                 count = batch.length;
                 // 1s/60calls = 0.0167 seconds per call
-            }, 16.6667);
+            }, 1 / 60);
 
             s.background(0);
         };
 
         s.draw = () => {
-            // FIXME: why does it look so weird on my monitor's screen?
             for (let item of batch) {
-                // if (item.isDrawn) continue;
-                s.fill(255);
-                s.rect(item.x, item.y, PIECE_SIZE, PIECE_SIZE);
+                s.noStroke();
+                s.fill(item.color.red, item.color.green, item.color.blue);
+                s.rect(item.x, item.y, 1, 1);
                 count = Math.max(count - 1, 0);
             }
         };

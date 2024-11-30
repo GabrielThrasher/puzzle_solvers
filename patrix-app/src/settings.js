@@ -1,13 +1,13 @@
-const _settings = {
+export const settings = {
     started: false,
     paused: false,
     speed: 1,
     pauseStateListeners: [],
 
     getBatchSize() {
-        if (this.speed == 1.5) return 50;
-        else if (this.speed === 2) return 100;
-        else return 40;
+        if (this.speed == 1.5) return 200;
+        else if (this.speed === 2) return 300;
+        else return 100;
     },
 
     increaseSpeed() {
@@ -29,7 +29,3 @@ const _settings = {
         this.pauseStateListeners.push(cb);
     },
 };
-
-const settingsHandler = {};
-
-export const settings = new Proxy(_settings, settingsHandler);
