@@ -11,12 +11,11 @@ include_directories(${OpenCV_INCLUDE_DIRS})
 include_directories(patrix/src)
 
 add_executable(puzzle_solvers
-        ../patrix/src/main.cpp
-        ../patrix/src/puzzle_piece.h
-        ../patrix/src/puzzle_piece.cpp
-        ../patrix/src/puzzle.h
-        ../patrix/src/puzzle.cpp
-        ../patrix/src/utilities.cpp
+        src/main.cpp
+        src/puzzle_piece.cpp
+        src/puzzle.cpp
+        src/utilities.cpp
+        # src/process_image.cpp
 )
 
 set(OpenCV_LIBS opencv_core opencv_imgproc opencv_highgui opencv_imgcodecs)
