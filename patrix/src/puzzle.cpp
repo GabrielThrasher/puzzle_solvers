@@ -249,19 +249,19 @@ void Puzzle::updatePuzzleStorageMaps(PuzzlePiece *piece) {
 }
 
 int Puzzle::hashRGBValues(tuple<int, int, int> rgb) {
-    // std::hash<int> hasher;
+    std::hash<int> hasher;
 
-    // // Combine the hashes of individual numbers
-    // size_t hash_value = hasher(get<0>(rgb));
-    // hash_value ^= hasher(get<1>(rgb)) + 0x9e3779b9 + (hash_value << 6) +
-    //               (hash_value >> 2);
-    // hash_value ^= hasher(get<2>(rgb)) + 0x9e3779b9 + (hash_value << 6) +
-    //               (hash_value >> 2);
-    // return hash_value;
-    string hashValue = to_string(get<0>(rgb)) + to_string(get<1>(rgb)) +
-                       to_string(get<2>(rgb));
+    // Combine the hashes of individual numbers
+    size_t hash_value = hasher(get<0>(rgb));
+    hash_value ^= hasher(get<1>(rgb)) + 0x9e3779b9 + (hash_value << 6) +
+                  (hash_value >> 2);
+    hash_value ^= hasher(get<2>(rgb)) + 0x9e3779b9 + (hash_value << 6) +
+                  (hash_value >> 2);
+    return hash_value;
+    // string hashValue = to_string(get<0>(rgb)) + to_string(get<1>(rgb)) +
+    //                    to_string(get<2>(rgb));
 
-    return stoi(hashValue);
+    // return stoi(hashValue);
 }
 
 void Puzzle::printPuzzleStorageMapsSize() {

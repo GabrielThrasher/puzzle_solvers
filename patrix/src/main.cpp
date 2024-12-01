@@ -31,6 +31,6 @@ int getEdge() {
 int main() {
     // std::cout << getEdge() << std::endl;
     Puzzle puzzle;
-    puzzle.generate("../images/CityOverWater.png");
+    puzzle.generate("../images/BoyInGrass.png");
     puzzle.solve();
 }
