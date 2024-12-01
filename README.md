@@ -2,7 +2,7 @@
 
 An edge algorithm or a color algorithm -- which one is faster at solving the same 100,000-piece puzzle?
 
--   Report: LINKKKKKKKKKKKKKKKKKKKKKKKKKKKKKKKKKKKKKKK
+-   Group report: https://docs.google.com/document/d/1CtHTeDsB3ek1YZuyE03X-wqkDd6sa5OKrIwJZWb6L8o/edit?usp=sharing
 -   Original specs and documentation (for our reference when designing and building Patrix; NOT our submission for the report part of the project): https://docs.google.com/document/d/1sJvK5-OlWxgxBep6HvHFPAjq5-HgX8BW5DxKM1seIF0/edit?usp=sharing
 
 We highly recommend the following while running the code as that is what it has been proven to work on:
