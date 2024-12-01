@@ -173,7 +173,18 @@ void Puzzle::addColor(int row, int col, PuzzlePiece *piece,
             }
         }
     }
+//    cout << "ROW: " << row << " " << "COL: " << col << endl;
+//    cout << get<0>(piece->colors[1][1]) << " " << get<1>(piece->colors[1][1]) << " " << get<2>(piece->colors[1][1])  << endl;
+//    cout << get<0>(piece->colors[1][2]) << " " << get<1>(piece->colors[1][2]) << " " << get<2>(piece->colors[1][2])  << endl;
+//    cout << get<0>(piece->colors[2][1]) << " " << get<1>(piece->colors[2][1]) << " " << get<2>(piece->colors[2][1])  << endl;
+//    cout << get<0>(piece->colors[2][2]) << " " << get<1>(piece->colors[2][2]) << " " << get<2>(piece->colors[2][2])  << endl;
+//
+//    cout << get<0>(piece->colors[0][1]) << " " << get<1>(piece->colors[0][1]) << " " << get<2>(piece->colors[0][1])  << endl;
+//    cout << get<0>(piece->colors[0][2]) << " " << get<1>(piece->colors[0][2]) << " " << get<2>(piece->colors[0][2])  << endl;
+//
+
 }
+
 
 void Puzzle::updatePuzzleStorageMaps(PuzzlePiece *piece) {
     // Update edge storage
@@ -390,11 +401,13 @@ void Puzzle::EdgeAlgorithm(string filename) {
 
 
 void Puzzle::ColorAlgorithm(string filename) {
+
+
     //Set up random
     ofstream file(filename, ios::binary);
 
-    unordered_set<PuzzlePiece*> set1;
-    unordered_set<PuzzlePiece*> set2;
+    unordered_set<PuzzlePiece*>* set1;
+    unordered_set<PuzzlePiece*>* set2;
 
     unordered_set<PuzzlePiece> SolvedPuzzlePieces;
     unordered_set<PuzzlePiece> PiecesInColorCluster;
@@ -403,37 +416,47 @@ void Puzzle::ColorAlgorithm(string filename) {
     int randomIdx;
     int edgeValue;
 
-    while(numPiecesSolved <= rows*cols) {
+    unordered_set<PuzzlePiece> unsolvedPieces;
+    for (auto elem: topEdges) {
+        for (auto element: elem.second) {
+            unsolvedPieces.insert(*element);
+        }
+    }
+
+
+    while(SolvedPuzzlePieces.size() < rows*cols) {
         cout << "Starting new color cluster..." << endl;
         cout << "NumPieces: " << numPiecesSolved << endl;
+//        cout << "UNSOLVED PIECES: " << unsolvedPieces.size() << endl;
+//        cout << "SOLVED PIECES: " << SolvedPuzzlePieces.size() << endl;
 
         // Randomly select key
-        randomIdx = rand() % topEdges.size();
-        auto it = topEdges.begin();
+        randomIdx = rand() % unsolvedPieces.size();
+        auto it = unsolvedPieces.begin();
         advance(it, randomIdx);
 
-        PuzzlePiece* initPiece = *it->second.begin();
-        while(SolvedPuzzlePieces.find(*initPiece) != SolvedPuzzlePieces.end()) {
-            randomIdx = rand() % topEdges.size();
-            it = topEdges.begin();
-            advance(it, randomIdx);
-            initPiece = *it->second.begin();
-        }
+        PuzzlePiece initPiece = *it;
 
-        SolvedPuzzlePieces.insert(*initPiece);
+//        cout << "Row, Col: " << initPiece.row << " " << initPiece.col << endl;
 
-        vector<vector<tuple<int, int, int>>> colorMatrix = initPiece->colors;
+        SolvedPuzzlePieces.insert(initPiece);
+        numPiecesSolved++;
+        unsolvedPieces.erase(initPiece);
+
+        vector<vector<tuple<int, int, int>>> colorMatrix = initPiece.colors;
         vector<int> hashedRGB;
-        WriteToFile(initPiece, file);
+        WriteToFile(&initPiece, file);
 
-        NewPieceQueue.push(*initPiece);
+//        cout << "BEFORE: " << NewPieceQueue.size() << endl;
+        NewPieceQueue.push(initPiece);
+//        cout << "AFTER: " << NewPieceQueue.size() << endl;
+
 
         while (!NewPieceQueue.empty()) {
+//            cout << "NumPieces: " << numPiecesSolved << endl;
             //cout << "Queue size: " << NewPieceQueue.size() << endl;
             PuzzlePiece piece = NewPieceQueue.front();
-            //PiecesInColorCluster.insert(piece);
             NewPieceQueue.pop();
-            numPiecesSolved++;
 
             vector<int> vect = {piece.top, piece.bottom, piece.left, piece.right};
 
@@ -450,16 +473,16 @@ void Puzzle::ColorAlgorithm(string filename) {
                     for (int j = 1; j < colorMatrix[0].size() - 1; j++) {
                         hashedRGB.push_back(hashRGBValues(colorMatrix[0][j]));
                     }
-                    set1 = bottomLeftQuadColors[hashedRGB[0]];
-                    set2 = bottomRightQuadColors[hashedRGB[1]];
+                    set1 = &bottomLeftQuadColors[hashedRGB[0]];
+                    set2 = &bottomRightQuadColors[hashedRGB[1]];
                 }
                 //If 1st index: piece->bottom
                 if (i == 1) {
                     for (int j = 1; j < colorMatrix[colorMatrix.size() - 1].size() - 1; j++) {
                         hashedRGB.push_back(hashRGBValues(colorMatrix[colorMatrix.size() - 1][j]));
                     }
-                    set1 = topLeftQuadColors[hashedRGB[0]];
-                    set2 = topRightQuadColors[hashedRGB[1]];
+                    set1 = &topLeftQuadColors[hashedRGB[0]];
+                    set2 = &topRightQuadColors[hashedRGB[1]];
                 }
 
                 //If 2nd index: piece->left
@@ -467,8 +490,8 @@ void Puzzle::ColorAlgorithm(string filename) {
                     for (int j = 1; j < colorMatrix.size() - 1; j++) {
                         hashedRGB.push_back(hashRGBValues(colorMatrix[j][0]));
                     }
-                    set1 = topRightQuadColors[hashedRGB[0]];
-                    set2 = bottomRightQuadColors[hashedRGB[1]];
+                    set1 = &topRightQuadColors[hashedRGB[0]];
+                    set2 = &bottomRightQuadColors[hashedRGB[1]];
                 }
 
                 //If 3rd index: piece->right
@@ -476,24 +499,43 @@ void Puzzle::ColorAlgorithm(string filename) {
                     for (int j = 1; j < colorMatrix.size() - 1; j++) {
                         hashedRGB.push_back(hashRGBValues(colorMatrix[j][colorMatrix.size() - 1]));
                     }
-                    set1 = topLeftQuadColors[hashedRGB[0]];
-                    set2 = bottomLeftQuadColors[hashedRGB[1]];
+                    set1 = &topLeftQuadColors[hashedRGB[0]];
+                    set2 = &bottomLeftQuadColors[hashedRGB[1]];
                 }
 
 
                 int complement = getComplementEdge(edgeValue);
-                for (auto newPiece: set1) {
-                    if (set2.find(newPiece) != set2.end()) {
-                        vector<int> newPieceEdges = {newPiece->top, newPiece->bottom, newPiece->left, newPiece->right};
+                if(set1->size() > set2->size()) {
+                    auto temp = set2;
+                    set2 = set1;
+                    set1 = temp;
+                }
+
+                for (auto newPiece: *set1) {
+                    if (set2->find(newPiece) != set2->end()) {
+//                        cout << "New intersection piece" << endl;
+                        vector<int> newPieceEdges = {newPiece->bottom, newPiece->top, newPiece->right, newPiece->left};
                         for (int k = 0; k < newPieceEdges.size(); k++) {
-                            if (complement == newPieceEdges[k]) {
+//                            cout << "i: " << i << " " << "k: " << k << endl;
+                            if (i == k) {
+//                                cout << "Complement: " << complement << endl;
+//                                cout << "NewPiece: " << newPieceEdges[k] << endl;
+                            }
+                            if (i == k && complement == newPieceEdges[k]) {
                                 //Write new piece to file
                                 WriteToFile(newPiece, file);
-                                if (PiecesInColorCluster.find(*newPiece) == PiecesInColorCluster.end()) {
-                                    NewPieceQueue.push(*newPiece);
-                                    SolvedPuzzlePieces.insert(*newPiece);
-                                    PiecesInColorCluster.insert(*newPiece);
 
+//                                cout << "Hola!" << endl;
+                                if (PiecesInColorCluster.find(*newPiece) == PiecesInColorCluster.end()
+                                && SolvedPuzzlePieces.find(*newPiece) == SolvedPuzzlePieces.end()) {
+                                    NewPieceQueue.push(*newPiece);
+
+                                    SolvedPuzzlePieces.insert(*newPiece);
+
+                                    PiecesInColorCluster.insert(*newPiece);
+                                    unsolvedPieces.erase(*newPiece);
+//                                    cout << "Kevin!" << endl;
+                                    numPiecesSolved++;
                                 }
                             }
                         }
