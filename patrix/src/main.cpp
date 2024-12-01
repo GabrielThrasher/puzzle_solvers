@@ -3,6 +3,6 @@ using namespace std;
 
 int main() {
     Puzzle puzzle;
-    puzzle.generate("../patrix/images/BoyInGrass.png");
+    puzzle.generate("../patrix/images/ForestPicnic.webp");
     puzzle.solve();
 }
