@@ -2,15 +2,16 @@
 using namespace std;
 
 Puzzle::Puzzle() : puzzle(rows, vector<PuzzlePiece *>(cols)) {
-    utilities.displayHeader("Patrix 🧩");
+    Utilities::displayHeader("Patrix 🧩");
 }
 
 void Puzzle::generate(string imagePath) {
-    utilities.startSectionTime("generation");
-    utilities.displayHeader("PUZZLE GENERATION");
-    utilities.displayText("Starting puzzle generation...");
+    Utilities::startSectionTime("generation");
+    Utilities::displayHeader("PUZZLE GENERATION");
+    Utilities::displayText("Starting puzzle generation...");
 
-    cv::Mat rgbMatrix = readImage(imagePath, cols * pieceSize, rows * pieceSize);
+    cv::Mat rgbMatrix =
+        readImage(imagePath, cols * pieceSize, rows * pieceSize);
 
     for (int i = 0; i < rows; i++) {
         for (int j = 0; j < cols; j++) {
@@ -23,22 +24,24 @@ void Puzzle::generate(string imagePath) {
         }
     }
 
-    int duration = utilities.endSectionTime("generation");
-    utilities.displayText("Finished puzzle generation (" + to_string(duration) + " ms).");
-    utilities.displaySectionDivder();
+    int duration = Utilities::endSectionTime("generation");
+    Utilities::displayText("Finished puzzle generation (" +
+                           to_string(duration) + " ms).");
+    Utilities::displaySectionDivder();
     printPuzzleStorageMapsSize();
 }
 
 void Puzzle::solve() {
-    utilities.startSectionTime("algoSection");
-    utilities.displayHeader("SOLVE PUZZLE");
+    Utilities::startSectionTime("algoSection");
+    Utilities::displayHeader("SOLVE PUZZLE");
 
-    edgeAlgorithm("../patrix/algo steps/edgeAlgoSteps.bin");
-    colorAlgorithm("../patrix/algo steps/colorAlgoSteps.bin");
+    edgeAlgorithm("edgeAlgoSteps.bin");
+    colorAlgorithm("colorAlgoSteps.bin");
 
-    int duration = utilities.endSectionTime("algoSection");
-    utilities.displayText("Finished algorithm implementations (" + to_string(duration) + " ms).");
-    utilities.displaySectionDivder();
+    int duration = Utilities::endSectionTime("algoSection");
+    Utilities::displayText("Finished algorithm implementations (" +
+                           to_string(duration) + " ms).");
+    Utilities::displaySectionDivder();
 }
 
 void Puzzle::addEdges(int row, int col, PuzzlePiece *piece) {
@@ -118,21 +121,23 @@ int Puzzle::getEdge() {
     unsigned long seed = rd();
     mt19937 engine(seed);
 
-    discrete_distribution<> dist{{0, 1, 1, 0, 1, 1, 1}}; // Distribution of possible octal values: {1, 2, 4, 5, 6}
+    discrete_distribution<> dist{
+        {0, 1, 1, 0, 1, 1,
+         1}}; // Distribution of possible octal values: {1, 2, 4, 5, 6}
     auto rng = bind(dist, ref(engine));
 
     for (int sideIdx = 0; sideIdx < 8; sideIdx++) {
         int randNum = rng();
         octalStr += to_string(randNum);
     }
-    
+
     return stoi(octalStr);
 }
 
 int Puzzle::getUniqueEdge(EdgeMap &map) {
     int edge = getEdge();
     auto iter = map.find(edge);
-    
+
     // Keep generating a new edge octal value for as long as it is already being
     // used in a same-side edge OR it is the same as the flat edge value
     while (iter != map.end() || edge == flatEdge) {
@@ -157,7 +162,8 @@ int Puzzle::getComplementEdge(int num) {
     return stoi(comp);
 }
 
-void Puzzle::addColor(int row, int col, PuzzlePiece *piece, cv::Mat &rgbMatrix) {
+void Puzzle::addColor(int row, int col, PuzzlePiece *piece,
+                      cv::Mat &rgbMatrix) {
     // Matrix indices for the puzzle matrix
     int baseMartixRowIdx = 1;
     int baseMartixColIdx = 1;
@@ -189,61 +195,69 @@ void Puzzle::updatePuzzleStorageMaps(PuzzlePiece *piece) {
 
     // Update color storage
     topLeftQuadTopEdge[hashRGBValues(piece->colors[1][1])][piece->top] = piece;
-    topLeftQuadLeftEdge[hashRGBValues(piece->colors[1][1])][piece->left] = piece;
-    topRightQuadRightEdge[hashRGBValues(piece->colors[1][2])][piece->right] = piece;
-    bottomLeftQuadBottomEdge[hashRGBValues(piece->colors[2][1])][piece->bottom] = piece;
+    topLeftQuadLeftEdge[hashRGBValues(piece->colors[1][1])][piece->left] =
+        piece;
+    topRightQuadRightEdge[hashRGBValues(piece->colors[1][2])][piece->right] =
+        piece;
+    bottomLeftQuadBottomEdge[hashRGBValues(piece->colors[2][1])]
+                            [piece->bottom] = piece;
 }
 
 int Puzzle::hashRGBValues(tuple<int, int, int> rgb) {
-    string hashValue = to_string(get<0>(rgb)) + to_string(get<1>(rgb)) + to_string(get<2>(rgb));
+    string hashValue = to_string(get<0>(rgb)) + to_string(get<1>(rgb)) +
+                       to_string(get<2>(rgb));
 
     return stoi(hashValue);
 }
 
 void Puzzle::printPuzzleStorageMapsSize() {
     // Dev fcn to verify that the puzzle storage maps were created properly
-    utilities.startSectionTime("printStorage");
-    utilities.displayHeader("STORAGE INFO");
+    Utilities::startSectionTime("printStorage");
+    Utilities::displayHeader("STORAGE INFO");
 
     // Display the size of all edge maps
-    unordered_map<string, EdgeMap>
-        edgeMaps = {{"topEdges", topEdges},
-                    {"leftEdges", leftEdges},
-                    {"bottomEdges", bottomEdges},
-                    {"rightEdges", rightEdges}};
-    
+    unordered_map<string, EdgeMap> edgeMaps = {{"topEdges", topEdges},
+                                               {"leftEdges", leftEdges},
+                                               {"bottomEdges", bottomEdges},
+                                               {"rightEdges", rightEdges}};
+
     for (auto ele : edgeMaps) {
         string name = ele.first;
         unordered_map<int, unordered_set<PuzzlePiece *>> map = ele.second;
 
-        string text = name + " map: " + to_string(map.size() - 1) + " unique edges + " +
-            to_string(map[flatEdge].size()) + " flat edges = " + to_string(map.size() + map[flatEdge].size() - 1)
-            +" edges.";
-        utilities.displayText(text);
+        string text =
+            name + " map: " + to_string(map.size() - 1) + " unique edges + " +
+            to_string(map[flatEdge].size()) + " flat edges = " +
+            to_string(map.size() + map[flatEdge].size() - 1) + " edges.";
+        Utilities::displayText(text);
     }
 
     // Display the size of all color maps
-    unordered_map<string, ColorMap>
-        colorMaps = {{"topLeftQuadTopEdge", topLeftQuadTopEdge},
-                     {"topLeftQuadLeftEdge", topLeftQuadLeftEdge},
-                     {"topRightQuadRightEdge", topRightQuadRightEdge},
-                     {"bottomLeftQuadBottomEdge", bottomLeftQuadBottomEdge}};
-    
+    unordered_map<string, ColorMap> colorMaps = {
+        {"topLeftQuadTopEdge", topLeftQuadTopEdge},
+        {"topLeftQuadLeftEdge", topLeftQuadLeftEdge},
+        {"topRightQuadRightEdge", topRightQuadRightEdge},
+        {"bottomLeftQuadBottomEdge", bottomLeftQuadBottomEdge}};
+
     for (auto ele : colorMaps) {
         string name = ele.first;
         ColorMap map = ele.second;
 
-        string text = name + " map: " + to_string(map.size()) + " unique colors.";
-        utilities.displayText(text);
+        string text =
+            name + " map: " + to_string(map.size()) + " unique colors.";
+        Utilities::displayText(text);
     }
 
-    int duration = utilities.endSectionTime("printStorage");
-    utilities.displayText("Finished displaying storage info (" + to_string(duration) + " ms).");
-    utilities.displaySectionDivder();;
+    int duration = Utilities::endSectionTime("printStorage");
+    Utilities::displayText("Finished displaying storage info (" +
+                           to_string(duration) + " ms).");
+    Utilities::displaySectionDivder();
+    ;
 }
 
 bool Puzzle::isValidColorIdx(int row, int col) {
-    return ((row >= 0 && row < pieceSize * rows) && (col >= 0 && col < pieceSize * cols));
+    return ((row >= 0 && row < pieceSize * rows) &&
+            (col >= 0 && col < pieceSize * cols));
 }
 
 bool Puzzle::isValidMatirxIdx(int row, int col) {
@@ -256,19 +270,25 @@ void Puzzle::writePieceToFile(PuzzlePiece *element, ofstream &file) {
 
     for (int i = 1; i < (element->colors).size() - 1; i++) {
         for (int j = 1; j < (element->colors[0]).size() - 1; j++) {
-            file.write(reinterpret_cast<const char *>(&get<0>((element->colors)[i][j])), 2);
-            file.write(reinterpret_cast<const char *>(&get<1>((element->colors)[i][j])), 2);
-            file.write(reinterpret_cast<const char *>(&get<2>((element->colors)[i][j])), 2);
+            file.write(reinterpret_cast<const char *>(
+                           &get<0>((element->colors)[i][j])),
+                       2);
+            file.write(reinterpret_cast<const char *>(
+                           &get<1>((element->colors)[i][j])),
+                       2);
+            file.write(reinterpret_cast<const char *>(
+                           &get<2>((element->colors)[i][j])),
+                       2);
         }
     }
 }
 
 void Puzzle::edgeAlgorithm(string filename) {
-    utilities.startSectionTime("edgeAlgo");
-    utilities.displayText("Started edge algorithm.");
+    Utilities::startSectionTime("edgeAlgo");
+    Utilities::displayText("Started edge algorithm.");
 
     ofstream file(filename, ios::binary);
-    
+
     int complement;
     int leftIdx = 0;
     int rightIdx = cols;
@@ -290,7 +310,8 @@ void Puzzle::edgeAlgorithm(string filename) {
             if (isStarting) {
                 // Locate top left corner piece
                 for (auto piece : topEdges[flatEdge]) {
-                    if (leftEdges[flatEdge].find(piece) != leftEdges[flatEdge].end()) {
+                    if (leftEdges[flatEdge].find(piece) !=
+                        leftEdges[flatEdge].end()) {
                         // Write to file location + rgb values
                         writePieceToFile(piece, file);
                         complement = getComplementEdge(piece->right);
@@ -308,23 +329,26 @@ void Puzzle::edgeAlgorithm(string filename) {
 
             complement = getComplementEdge((*piece)->right);
             if (i == rightIdx - 1) {
-                // Get the complement of the bottom edge to prepare for top-to-down portion of algorithm
+                // Get the complement of the bottom edge to prepare for
+                // top-to-down portion of algorithm
                 complement = getComplementEdge((*piece)->bottom);
             }
         }
 
         // Start at row = 1
         for (int i = topIdx; i < bottomIdx; i++) {
-            // Index topEdges map with the complement-> returns set of all possible pieces
+            // Index topEdges map with the complement-> returns set of all
+            // possible pieces
             auto topSet = topEdges[complement];
             auto element = topSet.begin();
-            
+
             // Write to file location + rgb values
             writePieceToFile(*element, file);
             complement = getComplementEdge((*element)->bottom);
-            
+
             if (i == bottomIdx - 1) {
-                // Get complement of left edge to prepare for right to left portion of algorithm
+                // Get complement of left edge to prepare for right to left
+                // portion of algorithm
                 complement = getComplementEdge((*element)->left);
             }
         }
@@ -334,34 +358,38 @@ void Puzzle::edgeAlgorithm(string filename) {
             // Index rightEdges map with the complement
             auto rightSet = rightEdges[complement];
             auto element = rightSet.begin();
-            
+
             // Write to file location + rgb values
             writePieceToFile(*element, file);
             complement = getComplementEdge((*element)->left);
-            
+
             if (i == leftIdx) {
-                // Get complement of top edge to prepare for bottom to top portion of algorithm
+                // Get complement of top edge to prepare for bottom to top
+                // portion of algorithm
                 complement = getComplementEdge((*element)->top);
             }
         }
 
         // Start at row = rows - 2
         for (int i = bottomIdx - 2; i >= topIdx; i--) {
-            // Index bottomEdges map with the complement-> returns set of all possible pieces
+            // Index bottomEdges map with the complement-> returns set of all
+            // possible pieces
             auto bottomSet = bottomEdges[complement];
             auto element = bottomSet.begin();
-            
+
             // Write to file location + rgb values
             writePieceToFile(*element, file);
             complement = getComplementEdge((*element)->top);
-            
+
             if (i == topIdx) {
-                // Get complement of right edge to prepare for another left to right portion of algorithm
+                // Get complement of right edge to prepare for another left to
+                // right portion of algorithm
                 complement = getComplementEdge((*element)->right);
             }
         }
 
-        // Change the idx values to simuation the clockwise spiral that the algo does to solve the problem
+        // Change the idx values to simuation the clockwise spiral that the algo
+        // does to solve the problem
         leftIdx++;
         rightIdx--;
         topIdx++;
@@ -375,41 +403,57 @@ void Puzzle::edgeAlgorithm(string filename) {
         // Write to file location + rgb values
         writePieceToFile(*element, file);
     }
-    
-    int duration = utilities.endSectionTime("edgeAlgo");
-    utilities.displayText("Finished edge algorithm (" + to_string(duration) + " ms).");
-    
+
+    int duration = Utilities::endSectionTime("edgeAlgo");
+    Utilities::displayText("Finished edge algorithm (" + to_string(duration) +
+                           " ms).");
+
     file.write(reinterpret_cast<const char *>(&duration), 2);
     file.close();
 }
 
-tuple<int, int, int> Puzzle::getPixelRGB(PuzzlePiece* piece, int idx){
-    const auto& colors = piece->colors;
+tuple<int, int, int> Puzzle::getPixelRGB(PuzzlePiece *piece, int idx) {
+    const auto &colors = piece->colors;
 
-    if (idx == 0) return colors[0][1];
-    if (idx == 1) return colors[colors[0].size() - 1][1];
-    if (idx == 2) return colors[1][0];
-    if (idx == 3) return colors[1][colors[0].size() - 1];
+    if (idx == 0)
+        return colors[0][1];
+    if (idx == 1)
+        return colors[colors[0].size() - 1][1];
+    if (idx == 2)
+        return colors[1][0];
+    if (idx == 3)
+        return colors[1][colors[0].size() - 1];
 }
 
-PuzzlePiece* Puzzle::getColorPiece(PuzzlePiece* piece, int idx, int edgeValue, int startingHashRGBValue) {
+PuzzlePiece *Puzzle::getColorPiece(PuzzlePiece *piece, int idx, int edgeValue,
+                                   int startingHashRGBValue) {
     tuple<int, int, int> pixelRGB = getPixelRGB(piece, idx);
     int hashRGBValue = hashRGBValues(pixelRGB);
 
-    if (hashRGBValue != startingHashRGBValue) return nullptr;
+    if (hashRGBValue != startingHashRGBValue)
+        return nullptr;
 
-    unordered_map<int, unordered_map<int, PuzzlePiece*>>* colorMap;
+    unordered_map<int, unordered_map<int, PuzzlePiece *>> *colorMap;
     switch (idx) {
-        case 0: colorMap = &bottomLeftQuadBottomEdge; break;
-        case 1: colorMap = &topLeftQuadTopEdge; break;
-        case 2: colorMap = &topRightQuadRightEdge; break;
-        case 3: colorMap = &topLeftQuadLeftEdge; break;
-        default: return nullptr;
+    case 0:
+        colorMap = &bottomLeftQuadBottomEdge;
+        break;
+    case 1:
+        colorMap = &topLeftQuadTopEdge;
+        break;
+    case 2:
+        colorMap = &topRightQuadRightEdge;
+        break;
+    case 3:
+        colorMap = &topLeftQuadLeftEdge;
+        break;
+    default:
+        return nullptr;
     }
 
     auto it = colorMap->find(hashRGBValue);
     if (it != colorMap->end()) {
-        auto& sameColorPieces = it->second;
+        auto &sameColorPieces = it->second;
         int compEdge = getComplementEdge(edgeValue);
         auto compIt = sameColorPieces.find(compEdge);
 
@@ -422,32 +466,32 @@ PuzzlePiece* Puzzle::getColorPiece(PuzzlePiece* piece, int idx, int edgeValue, i
 }
 
 void Puzzle::colorAlgorithm(string filename) {
-    utilities.startSectionTime("colorAlgo");
-    utilities.displayText("Started color algorithm.");
+    Utilities::startSectionTime("colorAlgo");
+    Utilities::displayText("Started color algorithm.");
 
     ofstream file(filename, ios::binary);
     int numPieces = rows * cols;
     float bufferMultiple = 1.25;
     int edgeValue;
 
-    unordered_set<PuzzlePiece*> unsolvedPieces;
-    unsolvedPieces.reserve(bufferMultiple*numPieces);
+    unordered_set<PuzzlePiece *> unsolvedPieces;
+    unsolvedPieces.reserve(bufferMultiple * numPieces);
     unsolvedPieces.rehash(unsolvedPieces.bucket_count());
 
-    unordered_set<PuzzlePiece*> SolvedPuzzlePieces;
-    SolvedPuzzlePieces.reserve(bufferMultiple*numPieces);
+    unordered_set<PuzzlePiece *> SolvedPuzzlePieces;
+    SolvedPuzzlePieces.reserve(bufferMultiple * numPieces);
 
-    queue<PuzzlePiece*> NewPieceQueue;
+    queue<PuzzlePiece *> NewPieceQueue;
 
     // Convert unordered map to unordered set
-    for (auto& elem : topEdges) {
+    for (auto &elem : topEdges) {
         for (auto piece : elem.second) {
             unsolvedPieces.insert(piece);
         }
     }
 
     while (!unsolvedPieces.empty()) {
-        PuzzlePiece* initPiece = *unsolvedPieces.begin();
+        PuzzlePiece *initPiece = *unsolvedPieces.begin();
 
         SolvedPuzzlePieces.insert(initPiece);
         unsolvedPieces.erase(initPiece);
@@ -456,21 +500,26 @@ void Puzzle::colorAlgorithm(string filename) {
         int startingHashRGBValue = hashRGBValues(initPiece->colors[3][1]);
 
         while (!NewPieceQueue.empty()) {
-            PuzzlePiece* piece = NewPieceQueue.front();
+            PuzzlePiece *piece = NewPieceQueue.front();
             NewPieceQueue.pop();
 
-            vector<int> vect = {piece->top, piece->bottom, piece->left, piece->right};
+            vector<int> vect = {piece->top, piece->bottom, piece->left,
+                                piece->right};
             for (int i = 0; i < vect.size(); i++) {
                 edgeValue = vect[i];
 
-                // We want to avoid flat edges as the cluster will not expand in the direction of the flat edge
-                if (edgeValue == flatEdge) continue;
+                // We want to avoid flat edges as the cluster will not expand in
+                // the direction of the flat edge
+                if (edgeValue == flatEdge)
+                    continue;
 
                 // Get the connecting piece
-                PuzzlePiece* connectingPiece = getColorPiece(piece, i, edgeValue, startingHashRGBValue);
+                PuzzlePiece *connectingPiece =
+                    getColorPiece(piece, i, edgeValue, startingHashRGBValue);
 
                 if (connectingPiece != nullptr) {
-                    if (SolvedPuzzlePieces.find(connectingPiece) == SolvedPuzzlePieces.end()) {
+                    if (SolvedPuzzlePieces.find(connectingPiece) ==
+                        SolvedPuzzlePieces.end()) {
                         SolvedPuzzlePieces.insert(connectingPiece);
                         unsolvedPieces.erase(connectingPiece);
                         NewPieceQueue.push(connectingPiece);
@@ -481,9 +530,10 @@ void Puzzle::colorAlgorithm(string filename) {
         }
     }
 
-    int duration = utilities.endSectionTime("colorAlgo");
-    utilities.displayText("Finished color algorithm (" + to_string(duration) + " ms).");
-    
+    int duration = Utilities::endSectionTime("colorAlgo");
+    Utilities::displayText("Finished color algorithm (" + to_string(duration) +
+                           " ms).");
+
     file.write(reinterpret_cast<const char *>(&duration), 2);
     file.close();
 }
@@ -501,61 +551,62 @@ void Puzzle::displayImage(string imagePath, cv::Mat &img) {
     imshow("Puzzle Image", img);
 }
 
-void Puzzle::savePuzzleEdgeMap(string file, EdgeMap& map) {
+void Puzzle::savePuzzleEdgeMap(string file, EdgeMap &map) {
     std::ofstream out(file, std::ios::binary);
 
     // Write size of the map
     int mapSize = map.size();
-    out.write(reinterpret_cast<const char*>(&mapSize), sizeof(mapSize));
+    out.write(reinterpret_cast<const char *>(&mapSize), sizeof(mapSize));
 
     // Write key-value pairs
-    for (const auto& keyValuePair : map) {
+    for (const auto &keyValuePair : map) {
         int key = keyValuePair.first;
-        out.write(reinterpret_cast<const char*>(&key), sizeof(key));
+        out.write(reinterpret_cast<const char *>(&key), sizeof(key));
 
-        unordered_set<PuzzlePiece*> set = keyValuePair.second;
+        unordered_set<PuzzlePiece *> set = keyValuePair.second;
         int set_size = set.size();
-        out.write(reinterpret_cast<const char*>(&set_size), sizeof(set_size));
+        out.write(reinterpret_cast<const char *>(&set_size), sizeof(set_size));
 
         // Write each piece in the set
-        for (const auto& piece : set) {
+        for (const auto &piece : set) {
             piece->write(out);
         }
     }
     out.close();
 }
 
-void Puzzle::savePuzzleColorMap(string file, ColorMap& map) {
+void Puzzle::savePuzzleColorMap(string file, ColorMap &map) {
     std::ofstream out(file, std::ios::binary);
 
     // Write size of the map
     int mapSize = map.size();
-    out.write(reinterpret_cast<const char*>(&mapSize), sizeof(mapSize));
+    out.write(reinterpret_cast<const char *>(&mapSize), sizeof(mapSize));
 
     // Write key-value pairs
-    for (const auto& keyValuePair : map) {
+    for (const auto &keyValuePair : map) {
         int key = keyValuePair.first;
-        out.write(reinterpret_cast<const char*>(&key), sizeof(key));
+        out.write(reinterpret_cast<const char *>(&key), sizeof(key));
 
-        const unordered_map<int, PuzzlePiece*> nestedMap = keyValuePair.second;
+        const unordered_map<int, PuzzlePiece *> nestedMap = keyValuePair.second;
 
         // Write size of the map
         int nestedMapSize = nestedMap.size();
-        out.write(reinterpret_cast<const char*>(&nestedMapSize), sizeof(nestedMapSize));
+        out.write(reinterpret_cast<const char *>(&nestedMapSize),
+                  sizeof(nestedMapSize));
 
         // Write each edge and piece in the key-value pair in the map
-        for (const auto& keyValuePair : nestedMap) {
+        for (const auto &keyValuePair : nestedMap) {
             key = keyValuePair.first;
-            out.write(reinterpret_cast<const char*>(&key), sizeof(key));
+            out.write(reinterpret_cast<const char *>(&key), sizeof(key));
 
-            PuzzlePiece* piece = keyValuePair.second;
+            PuzzlePiece *piece = keyValuePair.second;
             piece->write(out);
         }
     }
     out.close();
 }
 
-void Puzzle::loadPuzzleEdgeMap(string file, EdgeMap& map){
+void Puzzle::loadPuzzleEdgeMap(string file, EdgeMap &map) {
     std::ifstream in(file, std::ios::binary);
 
     in.seekg(0, std::ios::end);
@@ -569,7 +620,7 @@ void Puzzle::loadPuzzleEdgeMap(string file, EdgeMap& map){
     int offset = 0; // Keeps track of the current position in the buffer
 
     // Helper lambda to read data and advance the offset
-    auto readFromBuffer = [&](auto& variable) {
+    auto readFromBuffer = [&](auto &variable) {
         std::memcpy(&variable, buffer.data() + offset, sizeof(variable));
         offset += sizeof(variable);
     };
@@ -587,9 +638,9 @@ void Puzzle::loadPuzzleEdgeMap(string file, EdgeMap& map){
         int setSize;
         readFromBuffer(setSize); // Read the size of the set
 
-        std::unordered_set<PuzzlePiece*> pieces;
+        std::unordered_set<PuzzlePiece *> pieces;
         for (int j = 0; j < setSize; j++) {
-            PuzzlePiece* piece = new PuzzlePiece;
+            PuzzlePiece *piece = new PuzzlePiece;
             offset = piece->read(buffer, offset);
             pieces.insert(piece);
         }
@@ -598,7 +649,7 @@ void Puzzle::loadPuzzleEdgeMap(string file, EdgeMap& map){
     }
 }
 
-void Puzzle::loadPuzzleColorMap(string file, ColorMap& map){
+void Puzzle::loadPuzzleColorMap(string file, ColorMap &map) {
     std::ifstream in(file, std::ios::binary);
 
     in.seekg(0, std::ios::end);
@@ -612,7 +663,7 @@ void Puzzle::loadPuzzleColorMap(string file, ColorMap& map){
     int offset = 0; // Keeps track of the current position in the buffer
 
     // Helper lambda to read data and advance the offset
-    auto readFromBuffer = [&](auto& variable) {
+    auto readFromBuffer = [&](auto &variable) {
         std::memcpy(&variable, buffer.data() + offset, sizeof(variable));
         offset += sizeof(variable);
     };
@@ -630,12 +681,12 @@ void Puzzle::loadPuzzleColorMap(string file, ColorMap& map){
         int nestedMapSize;
         readFromBuffer(nestedMapSize);
 
-        unordered_map<int, PuzzlePiece*> nestedMap;
+        unordered_map<int, PuzzlePiece *> nestedMap;
         for (int j = 0; j < nestedMapSize; j++) {
             int nestedKey;
             readFromBuffer(nestedKey);
 
-            PuzzlePiece* piece = new PuzzlePiece;
+            PuzzlePiece *piece = new PuzzlePiece;
             offset = piece->read(buffer, offset);
             nestedMap.insert({nestedKey, piece});
         }
@@ -645,41 +696,50 @@ void Puzzle::loadPuzzleColorMap(string file, ColorMap& map){
 }
 
 void Puzzle::save() {
-    utilities.startSectionTime("save");
+    Utilities::startSectionTime("save");
 
-    utilities.displayHeader("SAVE GENERATED PUZZLE");
-    utilities.displayText("Saving...");
+    Utilities::displayHeader("SAVE GENERATED PUZZLE");
+    Utilities::displayText("Saving...");
 
     savePuzzleEdgeMap("../patrix/saved puzzle/topEdges.bin", topEdges);
     savePuzzleEdgeMap("../patrix/saved puzzle/leftEdges.bin", leftEdges);
     savePuzzleEdgeMap("../patrix/saved puzzle/bottomEdges.bin", bottomEdges);
     savePuzzleEdgeMap("../patrix/saved puzzle/rightEdges.bin", rightEdges);
-    savePuzzleColorMap("../patrix/saved puzzle/topLeftQuadTopEdge.bin", topLeftQuadTopEdge);
-    savePuzzleColorMap("../patrix/saved puzzle/topLeftQuadLeftEdge.bin", topLeftQuadLeftEdge);
-    savePuzzleColorMap("../patrix/saved puzzle/topRightQuadRightEdge.bin", topRightQuadRightEdge);
-    savePuzzleColorMap("../patrix/saved puzzle/bottomLeftQuadBottomEdge.bin", bottomLeftQuadBottomEdge);
+    savePuzzleColorMap("../patrix/saved puzzle/topLeftQuadTopEdge.bin",
+                       topLeftQuadTopEdge);
+    savePuzzleColorMap("../patrix/saved puzzle/topLeftQuadLeftEdge.bin",
+                       topLeftQuadLeftEdge);
+    savePuzzleColorMap("../patrix/saved puzzle/topRightQuadRightEdge.bin",
+                       topRightQuadRightEdge);
+    savePuzzleColorMap("../patrix/saved puzzle/bottomLeftQuadBottomEdge.bin",
+                       bottomLeftQuadBottomEdge);
 
-    int duration = utilities.endSectionTime("save");
-    utilities.displayText("Finished saving (" + to_string(duration) + " ms).");
-    utilities.displaySectionDivder();
+    int duration = Utilities::endSectionTime("save");
+    Utilities::displayText("Finished saving (" + to_string(duration) + " ms).");
+    Utilities::displaySectionDivder();
 }
 
 void Puzzle::load() {
-    utilities.startSectionTime("load");
+    Utilities::startSectionTime("load");
 
-    utilities.displayHeader("LOAD IN PUZZLE");
-    utilities.displayText("Loading...");
+    Utilities::displayHeader("LOAD IN PUZZLE");
+    Utilities::displayText("Loading...");
 
     loadPuzzleEdgeMap("../patrix/saved puzzle/topEdges.bin", topEdges);
     loadPuzzleEdgeMap("../patrix/saved puzzle/leftEdges.bin", leftEdges);
     loadPuzzleEdgeMap("../patrix/saved puzzle/bottomEdges.bin", bottomEdges);
     loadPuzzleEdgeMap("../patrix/saved puzzle/rightEdges.bin", TESTrightEdges);
-    loadPuzzleColorMap("../patrix/saved puzzle/topLeftQuadTopEdge.bin", topLeftQuadTopEdge);
-    loadPuzzleColorMap("../patrix/saved puzzle/topLeftQuadLeftEdge.bin", topLeftQuadLeftEdge);
-    loadPuzzleColorMap("../patrix/saved puzzle/topRightQuadRightEdge.bin", topRightQuadRightEdge);
-    loadPuzzleColorMap("../patrix/saved puzzle/bottomLeftQuadBottomEdge.bin", TESTbottomLeftQuadBottomEdge);
+    loadPuzzleColorMap("../patrix/saved puzzle/topLeftQuadTopEdge.bin",
+                       topLeftQuadTopEdge);
+    loadPuzzleColorMap("../patrix/saved puzzle/topLeftQuadLeftEdge.bin",
+                       topLeftQuadLeftEdge);
+    loadPuzzleColorMap("../patrix/saved puzzle/topRightQuadRightEdge.bin",
+                       topRightQuadRightEdge);
+    loadPuzzleColorMap("../patrix/saved puzzle/bottomLeftQuadBottomEdge.bin",
+                       TESTbottomLeftQuadBottomEdge);
 
-    int duration = utilities.endSectionTime("load");
-    utilities.displayText("Finished loading (" + to_string(duration) + " ms).");
-    utilities.displaySectionDivder();
+    int duration = Utilities::endSectionTime("load");
+    Utilities::displayText("Finished loading (" + to_string(duration) +
+                           " ms).");
+    Utilities::displaySectionDivder();
 }
