@@ -1,6 +1,7 @@
 #include "puzzle_piece.h"
 
-PuzzlePiece::PuzzlePiece(int row, int col, int pieceSize) {
+PuzzlePiece::PuzzlePiece(int row, int col, int pieceSize)
+    : colors(4, vector<tuple<int, int, int>>(4)) {
     this->col = col;
     this->row = row;
     initColor(pieceSize);
@@ -13,51 +14,50 @@ bool PuzzlePiece::operator==(const PuzzlePiece &other) const {
 }
 
 void PuzzlePiece::initColor(int pieceSize) {
-    std::tuple<int, int, int> arr = {-1, -1, -1};
-
-    for (int i = 0; i < pieceSize + 2; i++) {
-        vector<tuple<int, int, int>> row;
-        for (int j = 0; j < pieceSize + 2; j++) {
-            row.push_back(arr);
+    for (int i = 0; i < colors.size(); i++) {
+        // std::cout << "i: " << i << std::endl;
+        // int a = colors[i].size();
+        for (int j = 0; j < colors[i].size(); j++) {
+            // row.push_back(arr);
+            colors[i][j] = {-1, -1, -1};
         }
-        colors.push_back(row);
     }
 }
 
-void PuzzlePiece::write(std::ofstream& out) const {
+void PuzzlePiece::write(std::ofstream &out) const {
     // Saving identifier info
-    out.write(reinterpret_cast<const char*>(&row), sizeof(row));
-    out.write(reinterpret_cast<const char*>(&col), sizeof(col));
+    out.write(reinterpret_cast<const char *>(&row), sizeof(row));
+    out.write(reinterpret_cast<const char *>(&col), sizeof(col));
 
     // Saving edge info
-    out.write(reinterpret_cast<const char*>(&top), sizeof(top));
-    out.write(reinterpret_cast<const char*>(&left), sizeof(left));
-    out.write(reinterpret_cast<const char*>(&bottom), sizeof(bottom));
-    out.write(reinterpret_cast<const char*>(&right), sizeof(right));
+    out.write(reinterpret_cast<const char *>(&top), sizeof(top));
+    out.write(reinterpret_cast<const char *>(&left), sizeof(left));
+    out.write(reinterpret_cast<const char *>(&bottom), sizeof(bottom));
+    out.write(reinterpret_cast<const char *>(&right), sizeof(right));
 
     // Saving color info
     unsigned long long int rows = colors.size();
-    out.write(reinterpret_cast<const char*>(&rows), sizeof(rows));
+    out.write(reinterpret_cast<const char *>(&rows), sizeof(rows));
 
-    for (const auto& colorRow : colors) {
+    for (const auto &colorRow : colors) {
         unsigned long long int cols = colorRow.size();
-        out.write(reinterpret_cast<const char*>(&cols), sizeof(cols));
+        out.write(reinterpret_cast<const char *>(&cols), sizeof(cols));
 
-        for (const auto& rgb : colorRow) {
+        for (const auto &rgb : colorRow) {
             int red = get<0>(rgb);
             int green = get<1>(rgb);
             int blue = get<2>(rgb);
 
-            out.write(reinterpret_cast<const char*>(&red), sizeof(red));
-            out.write(reinterpret_cast<const char*>(&green), sizeof(green));
-            out.write(reinterpret_cast<const char*>(&blue), sizeof(blue));
+            out.write(reinterpret_cast<const char *>(&red), sizeof(red));
+            out.write(reinterpret_cast<const char *>(&green), sizeof(green));
+            out.write(reinterpret_cast<const char *>(&blue), sizeof(blue));
         }
     }
 }
 
-int PuzzlePiece::read(const std::vector<char>& buffer, int offset) {
+int PuzzlePiece::read(const std::vector<char> &buffer, int offset) {
     // Helper lambda to read from the buffer
-    auto readFromBuffer = [&](void* dest, int size) {
+    auto readFromBuffer = [&](void *dest, int size) {
         std::memcpy(dest, buffer.data() + offset, size);
         offset += size;
     };

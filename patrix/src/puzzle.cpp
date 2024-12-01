@@ -52,35 +52,35 @@ void Puzzle::addEdges(int row, int col, PuzzlePiece *piece) {
 
     // Top left corner piece
     if (col == minColIdx && row == minRowIdx) {
-        piece->top = flatEdge;
-        piece->left = flatEdge;
+        piece->top.value = flatEdge;
+        piece->left.value = flatEdge;
         piece->bottom = getUniqueEdge(bottomEdges);
         piece->right = getUniqueEdge(rightEdges);
     }
     // Top right corner piece
     else if (col == maxColIdx && row == minRowIdx) {
-        piece->top = flatEdge;
-        piece->right = flatEdge;
+        piece->top.value = flatEdge;
+        piece->right.value = flatEdge;
         piece->left = getComplementEdge(puzzle[row][col - 1]->right);
         piece->bottom = getUniqueEdge(bottomEdges);
     }
     // Bottom left corner piece
     else if (col == minColIdx && row == maxRowIdx) {
-        piece->left = flatEdge;
-        piece->bottom = flatEdge;
+        piece->left.value = flatEdge;
+        piece->bottom.value = flatEdge;
         piece->top = getComplementEdge(puzzle[row - 1][col]->bottom);
         piece->right = getUniqueEdge(rightEdges);
     }
     // Bottom right corner piece
     else if (col == maxColIdx && row == maxRowIdx) {
-        piece->bottom = flatEdge;
-        piece->right = flatEdge;
+        piece->bottom.value = flatEdge;
+        piece->right.value = flatEdge;
         piece->top = getComplementEdge(puzzle[row - 1][col]->bottom);
         piece->left = getComplementEdge(puzzle[row][col - 1]->right);
     }
     // Top edge piece
     else if (row == minRowIdx) {
-        piece->top = flatEdge;
+        piece->top.value = flatEdge;
         piece->left = getComplementEdge(puzzle[row][col - 1]->right);
         piece->bottom = getUniqueEdge(bottomEdges);
         piece->right = getUniqueEdge(rightEdges);
@@ -88,7 +88,7 @@ void Puzzle::addEdges(int row, int col, PuzzlePiece *piece) {
     // Left edge piece
     else if (col == minColIdx) {
         piece->top = getComplementEdge(puzzle[row - 1][col]->bottom);
-        piece->left = flatEdge;
+        piece->left.value = flatEdge;
         piece->bottom = getUniqueEdge(bottomEdges);
         piece->right = getUniqueEdge(rightEdges);
     }
@@ -96,7 +96,7 @@ void Puzzle::addEdges(int row, int col, PuzzlePiece *piece) {
     else if (row == maxRowIdx) {
         piece->top = getComplementEdge(puzzle[row - 1][col]->bottom);
         piece->left = getComplementEdge(puzzle[row][col - 1]->right);
-        piece->bottom = flatEdge;
+        piece->bottom.value = flatEdge;
         piece->right = getUniqueEdge(rightEdges);
     }
     // Right edge piece
@@ -104,7 +104,7 @@ void Puzzle::addEdges(int row, int col, PuzzlePiece *piece) {
         piece->top = getComplementEdge(puzzle[row - 1][col]->bottom);
         piece->left = getComplementEdge(puzzle[row][col - 1]->right);
         piece->bottom = getUniqueEdge(bottomEdges);
-        piece->right = flatEdge;
+        piece->right.value = flatEdge;
     }
     // Middle piece
     else {
@@ -115,51 +115,95 @@ void Puzzle::addEdges(int row, int col, PuzzlePiece *piece) {
     }
 }
 
-int Puzzle::getEdge() {
-    string octalStr;
-    random_device rd;
-    unsigned long seed = rd();
-    mt19937 engine(seed);
+Edge Puzzle::getEdge() {
+    std::random_device rd;  // obtain a random number from hardware
+    std::mt19937 gen(rd()); // seed the generator
 
-    discrete_distribution<> dist{
-        {0, 1, 1, 0, 1, 1,
-         1}}; // Distribution of possible octal values: {1, 2, 4, 5, 6}
-    auto rng = bind(dist, ref(engine));
+    // std::uniform_int_distribution<> distr(0, 16777215 * 2); // define the
+    // range
+    std::uniform_int_distribution<> distr(1, 7); // define the range
 
-    for (int sideIdx = 0; sideIdx < 8; sideIdx++) {
-        int randNum = rng();
-        octalStr += to_string(randNum);
-    }
+    // return distr(gen) % 16777215;
+    Edge edge;
+    edge.cells.cell1 = distr(gen);
+    edge.cells.cell2 = distr(gen);
+    edge.cells.cell3 = distr(gen);
+    edge.cells.cell4 = distr(gen);
+    edge.cells.cell5 = distr(gen);
+    edge.cells.cell6 = distr(gen);
+    edge.cells.cell7 = distr(gen);
+    edge.cells.cell8 = distr(gen);
 
-    return stoi(octalStr);
+    return edge;
+    // string octalStr;
+    // random_device rd;
+    // unsigned long seed = rd();
+    // mt19937 engine(seed);
+
+    // discrete_distribution<> dist{
+    //     {0, 1, 1, 0, 1, 1,
+    //      1}}; // Distribution of possible octal values: {1, 2, 4, 5, 6}
+    // auto rng = bind(dist, ref(engine));
+
+    // for (int sideIdx = 0; sideIdx < 8; sideIdx++) {
+    //     int randNum = rng();
+    //     octalStr += to_string(randNum);
+    // }
+
+    // return stoi(octalStr);
 }
 
-int Puzzle::getUniqueEdge(EdgeMap &map) {
-    int edge = getEdge();
-    auto iter = map.find(edge);
+Edge Puzzle::getUniqueEdge(EdgeMap &map) {
+    // Utilities::startSectionTime("get unique edge");
+    Edge edge = getEdge();
+    auto iter = map.find(edge.value);
 
     // Keep generating a new edge octal value for as long as it is already being
     // used in a same-side edge OR it is the same as the flat edge value
-    while (iter != map.end() || edge == flatEdge) {
+    while (iter != map.end() || edge.value == flatEdge) {
         edge = getEdge();
-        iter = map.find(edge);
+        iter = map.find(edge.value);
     }
+    // int duration = Utilities::endSectionTime("get unique edge");
+    // Utilities::displayText("get unique (" +
+    //                        to_string(duration) + " ms).");
+    // Utilities::displaySectionDivder();
 
     return edge;
 }
 
-int Puzzle::getComplementEdge(int num) {
-    string str = to_string(num);
-    string comp = "";
-    unordered_map<char, char> compMap = {
-        {'1', '5'}, {'2', '6'}, {'4', '4'}, {'6', '2'}, {'5', '1'},
-    };
+Edge Puzzle::getComplementEdge(Edge &edge) {
+    int mask = 4;
+    Edge newEdge;
+    newEdge.value = edge.value;
+    if (edge.cells.cell1 != 4)
+        newEdge.cells.cell1 = edge.cells.cell1 ^ mask;
+    if (edge.cells.cell2 != 4)
+        newEdge.cells.cell2 = edge.cells.cell2 ^ mask;
+    if (edge.cells.cell3 != 4)
+        newEdge.cells.cell3 = edge.cells.cell3 ^ mask;
+    if (edge.cells.cell4 != 4)
+        newEdge.cells.cell4 = edge.cells.cell4 ^ mask;
+    if (edge.cells.cell5 != 4)
+        newEdge.cells.cell5 = edge.cells.cell5 ^ mask;
+    if (edge.cells.cell6 != 4)
+        newEdge.cells.cell6 = edge.cells.cell6 ^ mask;
+    if (edge.cells.cell7 != 4)
+        newEdge.cells.cell7 = edge.cells.cell7 ^ mask;
+    if (edge.cells.cell8 != 4)
+        newEdge.cells.cell8 = edge.cells.cell8 ^ mask;
+    return newEdge;
+    // k/ string str = to_string(num);
+    // string comp = "";
+    // unordered_map<char, char> compMap = {
+    //     {'1', '5'}, {'2', '6'}, {'4', '4'}, {'6', '2'}, {'5', '1'},
+    // };
 
-    for (auto chr : str) {
-        comp += compMap[chr];
-    }
+    // for (auto chr : str) {
+    //     comp += compMap[chr];
+    // }
 
-    return stoi(comp);
+    // return stoi(comp);
 }
 
 void Puzzle::addColor(int row, int col, PuzzlePiece *piece,
@@ -188,22 +232,32 @@ void Puzzle::addColor(int row, int col, PuzzlePiece *piece,
 
 void Puzzle::updatePuzzleStorageMaps(PuzzlePiece *piece) {
     // Update edge storage
-    topEdges[piece->top].insert(piece);
-    leftEdges[piece->left].insert(piece);
-    bottomEdges[piece->bottom].insert(piece);
-    rightEdges[piece->right].insert(piece);
+    topEdges[piece->top.value].insert(piece);
+    leftEdges[piece->left.value].insert(piece);
+    bottomEdges[piece->bottom.value].insert(piece);
+    rightEdges[piece->right.value].insert(piece);
 
     // Update color storage
-    topLeftQuadTopEdge[hashRGBValues(piece->colors[1][1])][piece->top] = piece;
-    topLeftQuadLeftEdge[hashRGBValues(piece->colors[1][1])][piece->left] =
+    topLeftQuadTopEdge[hashRGBValues(piece->colors[1][1])][piece->top.value] =
         piece;
-    topRightQuadRightEdge[hashRGBValues(piece->colors[1][2])][piece->right] =
+    topLeftQuadLeftEdge[hashRGBValues(piece->colors[1][1])][piece->left.value] =
         piece;
+    topRightQuadRightEdge[hashRGBValues(piece->colors[1][2])]
+                         [piece->right.value] = piece;
     bottomLeftQuadBottomEdge[hashRGBValues(piece->colors[2][1])]
-                            [piece->bottom] = piece;
+                            [piece->bottom.value] = piece;
 }
 
 int Puzzle::hashRGBValues(tuple<int, int, int> rgb) {
+    // std::hash<int> hasher;
+
+    // // Combine the hashes of individual numbers
+    // size_t hash_value = hasher(get<0>(rgb));
+    // hash_value ^= hasher(get<1>(rgb)) + 0x9e3779b9 + (hash_value << 6) +
+    //               (hash_value >> 2);
+    // hash_value ^= hasher(get<2>(rgb)) + 0x9e3779b9 + (hash_value << 6) +
+    //               (hash_value >> 2);
+    // return hash_value;
     string hashValue = to_string(get<0>(rgb)) + to_string(get<1>(rgb)) +
                        to_string(get<2>(rgb));
 
@@ -289,7 +343,7 @@ void Puzzle::edgeAlgorithm(string filename) {
 
     ofstream file(filename, ios::binary);
 
-    int complement;
+    Edge complement;
     int leftIdx = 0;
     int rightIdx = cols;
     int topIdx = 1;
@@ -321,7 +375,7 @@ void Puzzle::edgeAlgorithm(string filename) {
                 continue;
             }
             // Index leftEdges map with the complement
-            auto leftSet = leftEdges[complement];
+            auto leftSet = leftEdges[complement.value];
             auto piece = leftSet.begin();
 
             // Write to file location + rgb values
@@ -339,7 +393,7 @@ void Puzzle::edgeAlgorithm(string filename) {
         for (int i = topIdx; i < bottomIdx; i++) {
             // Index topEdges map with the complement-> returns set of all
             // possible pieces
-            auto topSet = topEdges[complement];
+            auto topSet = topEdges[complement.value];
             auto element = topSet.begin();
 
             // Write to file location + rgb values
@@ -356,7 +410,7 @@ void Puzzle::edgeAlgorithm(string filename) {
         // Start at col = cols - 2
         for (int i = rightIdx - 2; i >= leftIdx; i--) {
             // Index rightEdges map with the complement
-            auto rightSet = rightEdges[complement];
+            auto rightSet = rightEdges[complement.value];
             auto element = rightSet.begin();
 
             // Write to file location + rgb values
@@ -374,7 +428,7 @@ void Puzzle::edgeAlgorithm(string filename) {
         for (int i = bottomIdx - 2; i >= topIdx; i--) {
             // Index bottomEdges map with the complement-> returns set of all
             // possible pieces
-            auto bottomSet = bottomEdges[complement];
+            auto bottomSet = bottomEdges[complement.value];
             auto element = bottomSet.begin();
 
             // Write to file location + rgb values
@@ -398,7 +452,7 @@ void Puzzle::edgeAlgorithm(string filename) {
     }
 
     if (isOdd) {
-        auto lastSet = leftEdges[complement];
+        auto lastSet = leftEdges[complement.value];
         auto element = lastSet.begin();
         // Write to file location + rgb values
         writePieceToFile(*element, file);
@@ -425,7 +479,7 @@ tuple<int, int, int> Puzzle::getPixelRGB(PuzzlePiece *piece, int idx) {
         return colors[1][colors[0].size() - 1];
 }
 
-PuzzlePiece *Puzzle::getColorPiece(PuzzlePiece *piece, int idx, int edgeValue,
+PuzzlePiece *Puzzle::getColorPiece(PuzzlePiece *piece, int idx, Edge edgeValue,
                                    int startingHashRGBValue) {
     tuple<int, int, int> pixelRGB = getPixelRGB(piece, idx);
     int hashRGBValue = hashRGBValues(pixelRGB);
@@ -454,8 +508,8 @@ PuzzlePiece *Puzzle::getColorPiece(PuzzlePiece *piece, int idx, int edgeValue,
     auto it = colorMap->find(hashRGBValue);
     if (it != colorMap->end()) {
         auto &sameColorPieces = it->second;
-        int compEdge = getComplementEdge(edgeValue);
-        auto compIt = sameColorPieces.find(compEdge);
+        Edge compEdge = getComplementEdge(edgeValue);
+        auto compIt = sameColorPieces.find(compEdge.value);
 
         if (compIt != sameColorPieces.end()) {
             return compIt->second;
@@ -472,7 +526,6 @@ void Puzzle::colorAlgorithm(string filename) {
     ofstream file(filename, ios::binary);
     int numPieces = rows * cols;
     float bufferMultiple = 1.25;
-    int edgeValue;
 
     unordered_set<PuzzlePiece *> unsolvedPieces;
     unsolvedPieces.reserve(bufferMultiple * numPieces);
@@ -503,14 +556,14 @@ void Puzzle::colorAlgorithm(string filename) {
             PuzzlePiece *piece = NewPieceQueue.front();
             NewPieceQueue.pop();
 
-            vector<int> vect = {piece->top, piece->bottom, piece->left,
-                                piece->right};
+            vector<Edge> vect = {piece->top, piece->bottom, piece->left,
+                                 piece->right};
             for (int i = 0; i < vect.size(); i++) {
-                edgeValue = vect[i];
+                Edge edgeValue = vect[i];
 
                 // We want to avoid flat edges as the cluster will not expand in
                 // the direction of the flat edge
-                if (edgeValue == flatEdge)
+                if (edgeValue.value == flatEdge)
                     continue;
 
                 // Get the connecting piece

@@ -19,7 +19,8 @@ class Puzzle {
     int cols = 317; // X dimension of puzzle
     int rows = 317; // Y dimension of puzzle
     int pieceSize = 2;
-    int flatEdge = 44444444; // Octal value for a flat edge
+    // int flatEdge = 44444444; // Octal value for a flat edge
+    int flatEdge = 9586980;
     vector<vector<PuzzlePiece *>> puzzle;
 
     // Storage by edge
@@ -39,9 +40,9 @@ class Puzzle {
     void addEdges(int row, int col, PuzzlePiece *piece);
     void addColor(int row, int col, PuzzlePiece *piece, cv::Mat &rgbMatrix);
 
-    int getUniqueEdge(EdgeMap &map);
-    int getEdge();
-    int getComplementEdge(int num);
+    Edge getUniqueEdge(EdgeMap &map);
+    Edge getEdge();
+    Edge getComplementEdge(Edge &edge);
 
     void updatePuzzleStorageMaps(PuzzlePiece *piece);
     void printPuzzleStorageMapsSize();
@@ -50,7 +51,7 @@ class Puzzle {
     bool isValidColorIdx(int row, int col);
     bool isValidMatirxIdx(int row, int col);
     void writePieceToFile(PuzzlePiece *element, ofstream &file);
-    PuzzlePiece *getColorPiece(PuzzlePiece *piece, int idx, int edgeValue,
+    PuzzlePiece *getColorPiece(PuzzlePiece *piece, int idx, Edge edgeValue,
                                int startingHashRGBValue);
     tuple<int, int, int> getPixelRGB(PuzzlePiece *piece, int idx);
 
