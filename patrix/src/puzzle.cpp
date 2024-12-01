@@ -673,13 +673,39 @@ void Puzzle::load() {
     loadPuzzleEdgeMap("../patrix/saved puzzle/topEdges.bin", topEdges);
     loadPuzzleEdgeMap("../patrix/saved puzzle/leftEdges.bin", leftEdges);
     loadPuzzleEdgeMap("../patrix/saved puzzle/bottomEdges.bin", bottomEdges);
-    loadPuzzleEdgeMap("../patrix/saved puzzle/rightEdges.bin", TESTrightEdges);
+    loadPuzzleEdgeMap("../patrix/saved puzzle/rightEdges.bin", rightEdges);
     loadPuzzleColorMap("../patrix/saved puzzle/topLeftQuadTopEdge.bin", topLeftQuadTopEdge);
     loadPuzzleColorMap("../patrix/saved puzzle/topLeftQuadLeftEdge.bin", topLeftQuadLeftEdge);
     loadPuzzleColorMap("../patrix/saved puzzle/topRightQuadRightEdge.bin", topRightQuadRightEdge);
-    loadPuzzleColorMap("../patrix/saved puzzle/bottomLeftQuadBottomEdge.bin", TESTbottomLeftQuadBottomEdge);
+    loadPuzzleColorMap("../patrix/saved puzzle/bottomLeftQuadBottomEdge.bin", bottomLeftQuadBottomEdge);
 
     int duration = utilities.endSectionTime("load");
     utilities.displayText("Finished loading (" + to_string(duration) + " ms).");
     utilities.displaySectionDivder();
+}
+
+void Puzzle::deleteLoadedPieces() {
+    // This function MUST be called after the load() function was used; you do need to call solve() after load() and
+    // before deleteLoadedPieces() though.
+
+    // Delete puzzle pieces that were on the heap in edge storage
+    vector<EdgeMap> edgeMaps = {topEdges, leftEdges, bottomEdges, rightEdges};
+    for (auto& map : edgeMaps) {
+        for (auto& ele : map) {
+            for (PuzzlePiece* piece : ele.second) {
+                delete piece;
+            }
+        }
+    }
+
+    // Delete puzzle pieces that were on the heap in color storage
+    vector<ColorMap> colorMaps = {topLeftQuadTopEdge, topLeftQuadLeftEdge, topRightQuadRightEdge,
+        bottomLeftQuadBottomEdge};
+    for (auto& map : colorMaps) {
+        for (auto& outerPair : map) {
+            for (auto& ele : outerPair.second) {
+                delete ele.second;
+            }
+        }
+    }
 }

@@ -30,14 +30,12 @@ class Puzzle {
     EdgeMap bottomEdges;
     EdgeMap leftEdges;
     EdgeMap rightEdges;
-    EdgeMap TESTrightEdges;
 
     // Storage by quadrant color and edge combos
     ColorMap topLeftQuadTopEdge;
     ColorMap topLeftQuadLeftEdge;
     ColorMap topRightQuadRightEdge;
     ColorMap bottomLeftQuadBottomEdge;
-    ColorMap TESTbottomLeftQuadBottomEdge;
 
     void addEdges(int row, int col, PuzzlePiece* piece);
     void addColor(int row, int col, PuzzlePiece* piece, cv::Mat &rgbMatrix);
@@ -62,10 +60,10 @@ class Puzzle {
     void edgeAlgorithm(string filename);
     void colorAlgorithm(string filename);
 
-    void Puzzle::savePuzzleEdgeMap(string file, EdgeMap& map);
-    void Puzzle::savePuzzleColorMap(string file, ColorMap& map);
-    void Puzzle::loadPuzzleEdgeMap(string file, EdgeMap& map);
-    void Puzzle::loadPuzzleColorMap(string file, ColorMap& map);
+    void savePuzzleEdgeMap(string file, EdgeMap& map);
+    void savePuzzleColorMap(string file, ColorMap& map);
+    void loadPuzzleEdgeMap(string file, EdgeMap& map);
+    void loadPuzzleColorMap(string file, ColorMap& map);
 
   public:
     Puzzle();
@@ -73,4 +71,5 @@ class Puzzle {
     void solve();
     void Puzzle::save();
     void Puzzle::load();
+    void deleteLoadedPieces();
 };
