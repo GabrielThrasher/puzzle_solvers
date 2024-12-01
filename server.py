@@ -9,11 +9,11 @@ app.add_middleware(CORSMiddleware, allow_origins="*")
 
 @app.get("/puzzle-color")
 def getcolor():
-    file_path = "color.bin"
+    file_path = "example.bin"
     return FileResponse(file_path)
 
 
 @app.get("/puzzle-edge")
 def getedge():
-    file_path = "edge.bin"
+    file_path = "example2.bin"
     return FileResponse(file_path)

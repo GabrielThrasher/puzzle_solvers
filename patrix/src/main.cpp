@@ -4,8 +4,8 @@ using namespace std;
 
 int main() {
     Puzzle puzzle;
-    puzzle.generateFromImage("images/black.png");
+    puzzle.generateFromImage("images/chicken.jpg");
 
-    puzzle.EdgeAlgorithm("example.bin");
-    //puzzle.ColorAlgorithm();
+    puzzle.ColorAlgorithm("color_al.bin");
+    // puzzle.ColorAlgorithm();
 }

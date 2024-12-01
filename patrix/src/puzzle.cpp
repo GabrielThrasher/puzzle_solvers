@@ -204,13 +204,35 @@ void Puzzle::updatePuzzleStorageMaps(PuzzlePiece *piece) {
     topRightQuadColors[hashRGBValues(piece->colors[1][2])].insert(piece);
     bottomLeftQuadColors[hashRGBValues(piece->colors[2][1])].insert(piece);
     bottomRightQuadColors[hashRGBValues(piece->colors[2][2])].insert(piece);
+
+    topleftQuadTopEdge[hashRGBValues(piece->colors[1][1])][piece->top] = piece;
+    topleftQuadLeftEdge[hashRGBValues(piece->colors[1][1])][piece->left] =
+        piece;
+
+    toprightQuadTopEdge[hashRGBValues(piece->colors[1][2])][piece->top] = piece;
+    toprightQuadRightEdge[hashRGBValues(piece->colors[1][2])][piece->right] =
+        piece;
+
+    bottomleftQuadBottomEdge[hashRGBValues(piece->colors[2][1])]
+                            [piece->bottom] = piece;
+    bottomleftQuadLeftEdge[hashRGBValues(piece->colors[2][1])][piece->left] =
+        piece;
+
+    bottomrightQuadBottomEdge[hashRGBValues(piece->colors[2][2])]
+                             [piece->bottom] = piece;
+    bottomrightQuadRightEdge[hashRGBValues(piece->colors[2][2])][piece->right] =
+        piece;
 }
 
 int Puzzle::hashRGBValues(tuple<int, int, int> rgb) {
-    string hashValue = to_string(get<0>(rgb)) + to_string(get<1>(rgb)) +
-                       to_string(get<2>(rgb));
+    size_t h1 = hash<int>{}(get<0>(rgb));
+    size_t h2 = hash<int>{}(get<1>(rgb));
+    size_t h3 = hash<int>{}(get<2>(rgb));
+    return h1 ^ (h2 << 1) ^ (h3 << 2); // Simple combining function
+    // string hashValue = to_string(get<0>(rgb)) + to_string(get<1>(rgb)) +
+    //                    to_string(get<2>(rgb));
 
-    return stoi(hashValue);
+    // return stoi(hashValue);
 }
 
 void Puzzle::printPuzzleStorageMapsSize() {
@@ -405,62 +427,151 @@ void Puzzle::EdgeAlgorithm(string filename) {
     file.close();
 }
 
+void Puzzle::ColorAlgorithmtest(string filename) {
+    ofstream file(filename, ios::binary);
+    bool done = false;
+
+    unordered_set<PuzzlePiece *> solved;
+    queue<PuzzlePiece *> newPieceQueue;
+    PuzzlePiece *piece = puzzle[rand() % rows][rand() % cols];
+    newPieceQueue.push(piece);
+    int count = 0;
+
+    while (!newPieceQueue.empty()) {
+        PuzzlePiece *currentPiece = newPieceQueue.front();
+        count++;
+        // std::cout << "piece: " << currentPiece->row << " - "
+        //           << currentPiece->col << std::endl;
+        solved.insert(currentPiece);
+        newPieceQueue.pop();
+        auto &colors = currentPiece->colors;
+
+        unordered_set<PuzzlePiece *> *set1;
+        unordered_set<PuzzlePiece *> *set2;
+
+        vector<int> edges = {currentPiece->top, currentPiece->bottom,
+                             currentPiece->left, currentPiece->right};
+        for (int i = 0; i < edges.size(); i++) {
+            int edge = edges[i];
+
+            if (edge == flatEdge) {
+                continue;
+            }
+
+            // If 0th index: piece->top
+            if (i == 0) {
+                set1 = &bottomLeftQuadColors[hashRGBValues(colors[0][1])];
+                set2 = &bottomRightQuadColors[hashRGBValues(colors[0][2])];
+            }
+
+            // If 1st index: piece->bottom
+            if (i == 1) {
+                set1 = &topLeftQuadColors[hashRGBValues(
+                    colors[colors.size() - 1][1])];
+                set2 = &topRightQuadColors[hashRGBValues(
+                    colors[colors.size() - 1][2])];
+            }
+
+            // If 2nd index: piece->left
+            if (i == 2) {
+                set1 = &topRightQuadColors[hashRGBValues(colors[1][0])];
+                set2 = &bottomRightQuadColors[hashRGBValues(colors[2][0])];
+            }
+
+            // If 3rd index: piece->right
+            if (i == 3) {
+                set1 = &topLeftQuadColors[hashRGBValues(
+                    colors[1][colors.size() - 1])];
+                set2 = &bottomLeftQuadColors[hashRGBValues(
+                    colors[2][colors.size() - 1])];
+            }
+
+            int complement = getComplementEdge(edge);
+            // bool found = false;
+            // PuzzlePiece *piece = puzzle[rand() % rows][rand() % cols];
+            // newPieceQueue.push(piece);
+
+            for (auto piece : *set1) {
+                if (piece == currentPiece)
+                    continue;
+                if (*piece == *currentPiece)
+                    continue;
+                if (solved.count(piece)) {
+                    continue;
+                }
+                if (set2->find(piece) != set2->end()) {
+                    vector<int> newPieceEdges = {piece->top, piece->bottom,
+                                                 piece->left, piece->right};
+                    for (int k = 0; k < newPieceEdges.size(); k++) {
+                        if (complement == newPieceEdges[k]) {
+                            if (solved.count(piece) == 0) {
+                                newPieceQueue.push(piece);
+                                // std::cout << "piece: " << piece->row << "
+                                // -"
+                                //           << piece->col << std::endl;
+                                solved.insert(piece);
+                                break;
+                            }
+                        }
+                    }
+                }
+            }
+        }
+    }
+    std::cout << "done: " << count << std::endl;
+    std::cout << "aa: " << solved.size() << std::endl;
+}
+
 void Puzzle::ColorAlgorithm(string filename) {
 
+    auto timeInit = chrono::system_clock::now();
     // Set up random
     ofstream file(filename, ios::binary);
 
     unordered_set<PuzzlePiece *> *set1;
     unordered_set<PuzzlePiece *> *set2;
 
-    unordered_set<PuzzlePiece> SolvedPuzzlePieces;
-    unordered_set<PuzzlePiece> PiecesInColorCluster;
-    queue<PuzzlePiece> NewPieceQueue;
+    unordered_set<PuzzlePiece *> SolvedPuzzlePieces;
+    queue<PuzzlePiece *> NewPieceQueue;
     int numPiecesSolved = 0;
     int randomIdx;
     int edgeValue;
 
-    unordered_set<PuzzlePiece> unsolvedPieces;
+    unordered_set<PuzzlePiece *> unsolvedPieces;
     for (auto elem : topEdges) {
         for (auto element : elem.second) {
-            unsolvedPieces.insert(*element);
+            unsolvedPieces.insert(element);
         }
     }
-
     while (SolvedPuzzlePieces.size() < rows * cols) {
-        cout << "Starting new color cluster..." << endl;
-        cout << "NumPieces: " << numPiecesSolved << endl;
-        //        cout << "UNSOLVED PIECES: " << unsolvedPieces.size() << endl;
-        //        cout << "SOLVED PIECES: " << SolvedPuzzlePieces.size() <<
-        //        endl;
+        // cout << "Starting new color cluster..." << endl;
+        // cout << "NumPieces: " << numPiecesSolved << endl;
+        unordered_set<PuzzlePiece *> PiecesInColorCluster;
 
-        // Randomly select key
-        randomIdx = rand() % unsolvedPieces.size();
-        auto it = unsolvedPieces.begin();
-        advance(it, randomIdx);
+        // // Randomly select key
+        // randomIdx = rand() % unsolvedPieces.size();
+        // auto it = unsolvedPieces.begin();
+        // advance(it, randomIdx);
 
-        PuzzlePiece initPiece = *it;
-
-        //        cout << "Row, Col: " << initPiece.row << " " << initPiece.col
-        //        << endl;
+        PuzzlePiece *initPiece = *unsolvedPieces.begin();
 
         SolvedPuzzlePieces.insert(initPiece);
         numPiecesSolved++;
         unsolvedPieces.erase(initPiece);
 
-        vector<vector<tuple<int, int, int>>> colorMatrix = initPiece.colors;
+        vector<vector<tuple<int, int, int>>> &colors = initPiece->colors;
         vector<int> hashedRGB;
-        WriteToFile(&initPiece, file);
+        WriteToFile(initPiece, file);
 
         NewPieceQueue.push(initPiece);
 
         while (!NewPieceQueue.empty()) {
-            PuzzlePiece piece = NewPieceQueue.front();
+            PuzzlePiece *piece = NewPieceQueue.front();
             NewPieceQueue.pop();
 
-            vector<int> vect = {piece.top, piece.bottom, piece.left,
-                                piece.right};
-
+            vector<int> vect = {piece->top, piece->bottom, piece->left,
+                                piece->right};
+            PuzzlePiece *foundPiece;
             for (int i = 0; i < vect.size(); i++) {
                 edgeValue = vect[i];
 
@@ -472,81 +583,117 @@ void Puzzle::ColorAlgorithm(string filename) {
 
                 // If 0th index: piece->top
                 if (i == 0) {
-                    for (int j = 1; j < colorMatrix[0].size() - 1; j++) {
-                        hashedRGB.push_back(hashRGBValues(colorMatrix[0][j]));
-                    }
-                    set1 = &bottomLeftQuadColors[hashedRGB[0]];
-                    set2 = &bottomRightQuadColors[hashedRGB[1]];
+                    // set1 =
+                    // &bottomLeftQuadColors[hashRGBValues(colors[0][1])]; set2
+                    // = &bottomRightQuadColors[hashRGBValues(colors[0][2])];
+                    foundPiece = bottomleftQuadBottomEdge[hashRGBValues(
+                        piece->colors[0][1])][getComplementEdge(edgeValue)];
                 }
+
                 // If 1st index: piece->bottom
                 if (i == 1) {
-                    for (int j = 1;
-                         j < colorMatrix[colorMatrix.size() - 1].size() - 1;
-                         j++) {
-                        hashedRGB.push_back(hashRGBValues(
-                            colorMatrix[colorMatrix.size() - 1][j]));
-                    }
-                    set1 = &topLeftQuadColors[hashedRGB[0]];
-                    set2 = &topRightQuadColors[hashedRGB[1]];
+                    // set1 = &topLeftQuadColors[hashRGBValues(
+                    //     colors[colors.size() - 1][1])];
+                    // set2 = &topRightQuadColors[hashRGBValues(
+                    //     colors[colors.size() - 1][2])];
+                    foundPiece =
+                        topleftQuadTopEdge[hashRGBValues(
+                            piece->colors[piece->colors.size() - 1][1])]
+                                          [getComplementEdge(edgeValue)];
                 }
 
                 // If 2nd index: piece->left
                 if (i == 2) {
-                    for (int j = 1; j < colorMatrix.size() - 1; j++) {
-                        hashedRGB.push_back(hashRGBValues(colorMatrix[j][0]));
-                    }
-                    set1 = &topRightQuadColors[hashedRGB[0]];
-                    set2 = &bottomRightQuadColors[hashedRGB[1]];
+                    // set1 = &topRightQuadColors[hashRGBValues(colors[1][0])];
+                    // set2 =
+                    // &bottomRightQuadColors[hashRGBValues(colors[2][0])];
+                    foundPiece = toprightQuadRightEdge[hashRGBValues(
+                        piece->colors[1][0])][getComplementEdge(edgeValue)];
                 }
 
                 // If 3rd index: piece->right
                 if (i == 3) {
-                    for (int j = 1; j < colorMatrix.size() - 1; j++) {
-                        hashedRGB.push_back(hashRGBValues(
-                            colorMatrix[j][colorMatrix.size() - 1]));
-                    }
-                    set1 = &topLeftQuadColors[hashedRGB[0]];
-                    set2 = &bottomLeftQuadColors[hashedRGB[1]];
+                    // set1 = &topLeftQuadColors[hashRGBValues(
+                    //     colors[1][colors.size() - 1])];
+                    // set2 = &bottomLeftQuadColors[hashRGBValues(
+                    //     colors[2][colors.size() - 1])];
+                    foundPiece =
+                        topleftQuadLeftEdge[hashRGBValues(
+                            piece->colors[0][piece->colors[0].size() - 1])]
+                                           [getComplementEdge(edgeValue)];
                 }
 
-                int complement = getComplementEdge(edgeValue);
-                if (set1->size() > set2->size()) {
-                    auto temp = set2;
-                    set2 = set1;
-                    set1 = temp;
+                // int complement = getComplementEdge(edgeValue);
+                // if (set1->size() > set2->size()) {
+                //     auto temp = set2;
+                //     set2 = set1;
+                //     set1 = temp;
+                // }
+
+                // std::cout << set1->size() << std::endl;
+
+                // std::cout << set2->size() << std::endl;
+                // for (auto p : *set2) {
+                //     std::cout << "piece: " << p->row << " - " << p->col
+                //               << std::endl;
+                // }
+                // for (auto newPiece : *set1) {
+                // if (newPiece == piece)
+                //     continue;
+
+                // auto timeInit = chrono::system_clock::now();
+                // if (set2->find(newPiece) != set2->end()) {
+                // auto timeFinal = chrono::system_clock::now();
+                // auto duration = timeFinal - timeInit;
+                // auto time =
+                //     chrono::duration_cast<chrono::nanoseconds>(duration)
+                //         .count();
+                // std::cout << "time: " << time << std::endl;
+                // vector<int> newPieceEdges = {
+                //     newPiece->bottom, newPiece->top, newPiece->right,
+                //     newPiece->left};
+                // for (int k = 0; k < newPieceEdges.size(); k++) {
+                //     if (i == k && complement == newPieceEdges[k]) {
+                // WriteToFile(foundPiece, file);
+                if (foundPiece) {
+                    std::cout << "piece: " << foundPiece->row << " - "
+                              << foundPiece->col << std::endl;
+                } else {
+                    std::cout << "null" << std::endl;
                 }
+                if (PiecesInColorCluster.find(foundPiece) ==
+                        PiecesInColorCluster.end() &&
+                    SolvedPuzzlePieces.find(foundPiece) ==
+                        SolvedPuzzlePieces.end()) {
+                    NewPieceQueue.push(foundPiece);
 
-                for (auto newPiece : *set1) {
-                    if (set2->find(newPiece) != set2->end()) {
-                        vector<int> newPieceEdges = {
-                            newPiece->bottom, newPiece->top, newPiece->right,
-                            newPiece->left};
-                        for (int k = 0; k < newPieceEdges.size(); k++) {
-                            if (i == k) {
-                            }
-                            if (i == k && complement == newPieceEdges[k]) {
-                                WriteToFile(newPiece, file);
-                                if (PiecesInColorCluster.find(*newPiece) ==
-                                        PiecesInColorCluster.end() &&
-                                    SolvedPuzzlePieces.find(*newPiece) ==
-                                        SolvedPuzzlePieces.end()) {
-                                    NewPieceQueue.push(*newPiece);
+                    SolvedPuzzlePieces.insert(foundPiece);
 
-                                    SolvedPuzzlePieces.insert(*newPiece);
+                    PiecesInColorCluster.insert(foundPiece);
+                    unsolvedPieces.erase(foundPiece);
 
-                                    PiecesInColorCluster.insert(*newPiece);
-                                    unsolvedPieces.erase(*newPiece);
-                                    numPiecesSolved++;
-                                }
-                            }
-                        }
-                    }
+                    numPiecesSolved++;
                 }
-
-                hashedRGB.clear();
+                //         break;
+                //     }
+                // }
+                // }
+                // }
+                // std::cout << "hi" << std::endl;
             }
+
+            // bottomLeftQuadColors[hashRGBValues(colors[colors.size() - 2][1])]
+            //     .erase(initPiece);
+            // bottomRightQuadColors[hashRGBValues(colors[colors.size() -
+            // 2][2])]
+            //     .erase(initPiece);
+            // topLeftQuadColors[hashRGBValues(colors[1][1])].erase(initPiece);
+            // topRightQuadColors[hashRGBValues(colors[1][2])].erase(initPiece);
         }
-        PiecesInColorCluster.clear();
     }
+    auto timeFinal = chrono::system_clock::now();
+    auto duration = timeFinal - timeInit;
+    auto time = chrono::duration_cast<chrono::seconds>(duration).count();
+    std::cout << "time: " << time << std::endl;
     cout << "Num Pieces Solved: " << numPiecesSolved << endl;
 }
