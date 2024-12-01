@@ -116,58 +116,36 @@ void Puzzle::addEdges(int row, int col, PuzzlePiece *piece) {
 }
 
 Edge Puzzle::getEdge() {
-    std::random_device rd;  // obtain a random number from hardware
-    std::mt19937 gen(rd()); // seed the generator
+    random_device rd;
+    unsigned long seed = rd();
+    mt19937 engine(seed);
 
-    // std::uniform_int_distribution<> distr(0, 16777215 * 2); // define the
-    // range
-    std::uniform_int_distribution<> distr(1, 7); // define the range
+    discrete_distribution<> dist{{0, 1, 1, 0, 1, 1, 1}};
+    auto rng = bind(dist, ref(engine));
 
-    // return distr(gen) % 16777215;
     Edge edge;
-    edge.cells.cell1 = distr(gen);
-    edge.cells.cell2 = distr(gen);
-    edge.cells.cell3 = distr(gen);
-    edge.cells.cell4 = distr(gen);
-    edge.cells.cell5 = distr(gen);
-    edge.cells.cell6 = distr(gen);
-    edge.cells.cell7 = distr(gen);
-    edge.cells.cell8 = distr(gen);
+    edge.cells.cell1 = rng();
+    edge.cells.cell2 = rng();
+    edge.cells.cell3 = rng();
+    edge.cells.cell4 = rng();
+    edge.cells.cell5 = rng();
+    edge.cells.cell6 = rng();
+    edge.cells.cell7 = rng();
+    edge.cells.cell8 = rng();
 
     return edge;
-    // string octalStr;
-    // random_device rd;
-    // unsigned long seed = rd();
-    // mt19937 engine(seed);
-
-    // discrete_distribution<> dist{
-    //     {0, 1, 1, 0, 1, 1,
-    //      1}}; // Distribution of possible octal values: {1, 2, 4, 5, 6}
-    // auto rng = bind(dist, ref(engine));
-
-    // for (int sideIdx = 0; sideIdx < 8; sideIdx++) {
-    //     int randNum = rng();
-    //     octalStr += to_string(randNum);
-    // }
-
-    // return stoi(octalStr);
 }
 
 Edge Puzzle::getUniqueEdge(EdgeMap &map) {
-    // Utilities::startSectionTime("get unique edge");
     Edge edge = getEdge();
     auto iter = map.find(edge.value);
 
-    // Keep generating a new edge octal value for as long as it is already being
+    // Keep generating a new edge value for as long as it is already being
     // used in a same-side edge OR it is the same as the flat edge value
     while (iter != map.end() || edge.value == flatEdge) {
         edge = getEdge();
         iter = map.find(edge.value);
     }
-    // int duration = Utilities::endSectionTime("get unique edge");
-    // Utilities::displayText("get unique (" +
-    //                        to_string(duration) + " ms).");
-    // Utilities::displaySectionDivder();
 
     return edge;
 }
@@ -193,17 +171,6 @@ Edge Puzzle::getComplementEdge(Edge &edge) {
     if (edge.cells.cell8 != 4)
         newEdge.cells.cell8 = edge.cells.cell8 ^ mask;
     return newEdge;
-    // k/ string str = to_string(num);
-    // string comp = "";
-    // unordered_map<char, char> compMap = {
-    //     {'1', '5'}, {'2', '6'}, {'4', '4'}, {'6', '2'}, {'5', '1'},
-    // };
-
-    // for (auto chr : str) {
-    //     comp += compMap[chr];
-    // }
-
-    // return stoi(comp);
 }
 
 void Puzzle::addColor(int row, int col, PuzzlePiece *piece,
@@ -248,20 +215,11 @@ void Puzzle::updatePuzzleStorageMaps(PuzzlePiece *piece) {
                             [piece->bottom.value] = piece;
 }
 
-int Puzzle::hashRGBValues(tuple<int, int, int> rgb) {
-    std::hash<int> hasher;
+int Puzzle::hashRGBValues(tuple<int, int, int> &rgb) {
+    string hashValue = to_string(get<0>(rgb)) + to_string(get<1>(rgb)) +
+                       to_string(get<2>(rgb));
 
-    // Combine the hashes of individual numbers
-    size_t hash_value = hasher(get<0>(rgb));
-    hash_value ^= hasher(get<1>(rgb)) + 0x9e3779b9 + (hash_value << 6) +
-                  (hash_value >> 2);
-    hash_value ^= hasher(get<2>(rgb)) + 0x9e3779b9 + (hash_value << 6) +
-                  (hash_value >> 2);
-    return hash_value;
-    // string hashValue = to_string(get<0>(rgb)) + to_string(get<1>(rgb)) +
-    //                    to_string(get<2>(rgb));
-
-    // return stoi(hashValue);
+    return stoi(hashValue);
 }
 
 void Puzzle::printPuzzleStorageMapsSize() {
@@ -466,59 +424,6 @@ void Puzzle::edgeAlgorithm(string filename) {
     file.close();
 }
 
-tuple<int, int, int> Puzzle::getPixelRGB(PuzzlePiece *piece, int idx) {
-    const auto &colors = piece->colors;
-
-    if (idx == 0)
-        return colors[0][1];
-    if (idx == 1)
-        return colors[colors[0].size() - 1][1];
-    if (idx == 2)
-        return colors[1][0];
-    if (idx == 3)
-        return colors[1][colors[0].size() - 1];
-}
-
-PuzzlePiece *Puzzle::getColorPiece(PuzzlePiece *piece, int idx, Edge edgeValue,
-                                   int startingHashRGBValue) {
-    tuple<int, int, int> pixelRGB = getPixelRGB(piece, idx);
-    int hashRGBValue = hashRGBValues(pixelRGB);
-
-    if (hashRGBValue != startingHashRGBValue)
-        return nullptr;
-
-    unordered_map<int, unordered_map<int, PuzzlePiece *>> *colorMap;
-    switch (idx) {
-    case 0:
-        colorMap = &bottomLeftQuadBottomEdge;
-        break;
-    case 1:
-        colorMap = &topLeftQuadTopEdge;
-        break;
-    case 2:
-        colorMap = &topRightQuadRightEdge;
-        break;
-    case 3:
-        colorMap = &topLeftQuadLeftEdge;
-        break;
-    default:
-        return nullptr;
-    }
-
-    auto it = colorMap->find(hashRGBValue);
-    if (it != colorMap->end()) {
-        auto &sameColorPieces = it->second;
-        Edge compEdge = getComplementEdge(edgeValue);
-        auto compIt = sameColorPieces.find(compEdge.value);
-
-        if (compIt != sameColorPieces.end()) {
-            return compIt->second;
-        }
-    }
-
-    return nullptr;
-}
-
 void Puzzle::colorAlgorithm(string filename) {
     Utilities::startSectionTime("colorAlgo");
     Utilities::displayText("Started color algorithm.");
@@ -589,6 +494,58 @@ void Puzzle::colorAlgorithm(string filename) {
 
     file.write(reinterpret_cast<const char *>(&duration), 2);
     file.close();
+}
+tuple<int, int, int> Puzzle::getPixelRGB(PuzzlePiece *piece, int idx) {
+    const auto &colors = piece->colors;
+
+    if (idx == 0)
+        return colors[0][1];
+    if (idx == 1)
+        return colors[colors[0].size() - 1][1];
+    if (idx == 2)
+        return colors[1][0];
+    if (idx == 3)
+        return colors[1][colors[0].size() - 1];
+}
+
+PuzzlePiece *Puzzle::getColorPiece(PuzzlePiece *piece, int idx, Edge edgeValue,
+                                   int startingHashRGBValue) {
+    tuple<int, int, int> pixelRGB = getPixelRGB(piece, idx);
+    int hashRGBValue = hashRGBValues(pixelRGB);
+
+    if (hashRGBValue != startingHashRGBValue)
+        return nullptr;
+
+    unordered_map<int, unordered_map<int, PuzzlePiece *>> *colorMap;
+    switch (idx) {
+    case 0:
+        colorMap = &bottomLeftQuadBottomEdge;
+        break;
+    case 1:
+        colorMap = &topLeftQuadTopEdge;
+        break;
+    case 2:
+        colorMap = &topRightQuadRightEdge;
+        break;
+    case 3:
+        colorMap = &topLeftQuadLeftEdge;
+        break;
+    default:
+        return nullptr;
+    }
+
+    auto it = colorMap->find(hashRGBValue);
+    if (it != colorMap->end()) {
+        auto &sameColorPieces = it->second;
+        Edge compEdge = getComplementEdge(edgeValue);
+        auto compIt = sameColorPieces.find(compEdge.value);
+
+        if (compIt != sameColorPieces.end()) {
+            return compIt->second;
+        }
+    }
+
+    return nullptr;
 }
 
 cv::Mat Puzzle::readImage(string imagePath, int newWidth, int newHeight) {

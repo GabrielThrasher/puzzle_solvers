@@ -15,10 +15,7 @@ bool PuzzlePiece::operator==(const PuzzlePiece &other) const {
 
 void PuzzlePiece::initColor(int pieceSize) {
     for (int i = 0; i < colors.size(); i++) {
-        // std::cout << "i: " << i << std::endl;
-        // int a = colors[i].size();
         for (int j = 0; j < colors[i].size(); j++) {
-            // row.push_back(arr);
             colors[i][j] = {-1, -1, -1};
         }
     }

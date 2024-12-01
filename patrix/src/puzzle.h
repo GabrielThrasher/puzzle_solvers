@@ -44,7 +44,7 @@ class Puzzle {
 
     void updatePuzzleStorageMaps(PuzzlePiece *piece);
     void printPuzzleStorageMapsSize();
-    int hashRGBValues(tuple<int, int, int> rgb);
+    int hashRGBValues(tuple<int, int, int> &rgb);
 
     bool isValidColorIdx(int row, int col);
     bool isValidMatirxIdx(int row, int col);
@@ -70,6 +70,5 @@ class Puzzle {
     void solve();
     void save();
     void load();
-    // void Puzzle::save();
-    // void Puzzle::load();
+    void deleteLoadedPieces();
 };
