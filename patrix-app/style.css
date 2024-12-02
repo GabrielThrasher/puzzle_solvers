@@ -51,7 +51,8 @@ button {
 }
 button:hover {
     /* border-color: #646cff; */
-    background-color: #322f2f;
+    /* background-color: #322f2f; */
+    background-color: black;
 }
 button:focus,
 button:focus-visible {
@@ -122,6 +123,7 @@ button:focus-visible {
     width: 634px;
     height: 634px;
     margin: 0 5px;
+    background-color: black;
 }
 
 #controls-area {
