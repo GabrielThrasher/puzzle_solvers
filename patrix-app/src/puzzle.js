@@ -4,7 +4,7 @@ export async function startPuzzle() {
     try {
         const [edgeResponse, colorResponse] = await Promise.all([
             fetch("http://127.0.0.1:8000/puzzle-edge"),
-            fetch("http://127.0.0.1:8000/puzzle-edge"),
+            fetch("http://127.0.0.1:8000/puzzle-color"),
         ]);
 
         if (!edgeResponse.ok || !colorResponse.ok) {
