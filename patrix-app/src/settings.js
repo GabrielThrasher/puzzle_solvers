@@ -3,6 +3,20 @@ export const settings = {
     paused: false,
     speed: 1,
     pauseStateListeners: [],
+    resetListeners: [],
+
+    start() {
+        this.started = true;
+    },
+
+    reset() {
+        for (let listener of this.resetListeners) {
+            listener();
+        }
+
+        this.paused = false;
+        this.pauseStateListeners = [];
+    },
 
     getBatchSize() {
         if (this.speed == 1.5) return 200;
@@ -27,5 +41,9 @@ export const settings = {
 
     listenToPauseState(cb) {
         this.pauseStateListeners.push(cb);
+    },
+
+    listenToReset(cb) {
+        this.resetListeners.push(cb);
     },
 };

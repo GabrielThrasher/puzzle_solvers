@@ -1,10 +1,20 @@
 import { settings } from "./settings";
 
-export async function startPuzzle() {
+const defaultPuzzles = {
+    edge: null,
+    color: null,
+};
+
+const times = {
+    edge: null,
+    color: null,
+};
+
+async function fetchPuzzle() {
     try {
         const [edgeResponse, colorResponse] = await Promise.all([
-            fetch("http://127.0.0.1:8000/puzzle-edge"),
-            fetch("http://127.0.0.1:8000/puzzle-color"),
+            fetch("http://127.0.0.1:8000/default-puzzle-edge"),
+            fetch("http://127.0.0.1:8000/default-puzzle-color"),
         ]);
 
         if (!edgeResponse.ok || !colorResponse.ok) {
@@ -14,26 +24,27 @@ export async function startPuzzle() {
         const edgeData = await edgeResponse.arrayBuffer();
         const colorData = await colorResponse.arrayBuffer();
 
-        renderPuzzle(edgeData, colorData);
+        defaultPuzzles.edge = new Uint16Array(edgeData);
+        defaultPuzzles.color = new Uint16Array(colorData);
     } catch (error) {
         console.error(error);
     }
 }
 
-const times = {
-    edge: null,
-    color: null,
-};
+export async function startPuzzle() {
+    if (!defaultPuzzles.color && !defaultPuzzles.edge) {
+        await fetchPuzzle();
+    }
+
+    renderPuzzle(defaultPuzzles.edge, defaultPuzzles.color);
+}
 
 export function renderPuzzle(edgeData, colorData) {
-    const edgeDataBytes = new Uint16Array(edgeData);
-    const colorDataBytes = new Uint16Array(colorData);
+    times.edge = edgeData[edgeData.length - 1];
+    times.color = colorData[colorData.length - 1];
 
-    times.edge = edgeDataBytes[edgeDataBytes.length - 1];
-    times.color = colorDataBytes[colorDataBytes.length - 1];
-
-    renderCanvas(edgeDataBytes, "canvas1");
-    renderCanvas(colorDataBytes, "canvas2");
+    renderCanvas(edgeData, "canvas1");
+    renderCanvas(colorData, "canvas2");
 }
 
 const WIDTH = 634;
@@ -47,11 +58,6 @@ function renderCanvas(bytes, canvasId) {
 
         s.setup = () => {
             s.createCanvas(WIDTH, HEIGHT);
-
-            settings.listenToPauseState((paused) => {
-                if (paused) s.noLoop();
-                else s.loop();
-            });
 
             let b = 0;
             let c = setInterval(() => {
@@ -120,6 +126,18 @@ function renderCanvas(bytes, canvasId) {
                 // 1s/60calls = 0.0167 seconds per call
             }, 1 / 60);
 
+            settings.listenToPauseState((paused) => {
+                if (paused) s.noLoop();
+                else s.loop();
+            });
+
+            settings.listenToReset(() => {
+                s.remove();
+                console.log("hi");
+                clearInterval(c);
+                settings.resetListeners = [];
+            });
+
             s.background(0);
         };
 
@@ -142,4 +160,6 @@ function puzzleFinishedHanlder() {
     durationContainer.style.display = "flex";
     edgeDuration.innerText = `${times.edge / 1000} seconds`;
     colorDuration.innerText = `${times.color / 1000} seconds`;
+
+    settings.started = false;
 }
