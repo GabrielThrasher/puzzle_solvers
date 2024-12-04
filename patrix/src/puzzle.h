@@ -19,8 +19,7 @@ class Puzzle {
     int cols = 317; // X dimension of puzzle
     int rows = 317; // Y dimension of puzzle
     int pieceSize = 2;
-    // int flatEdge = 44444444; // Octal value for a flat edge
-    int flatEdge = 9586980;
+    int flatEdge = 44444444; // Octal value for a flat edge
     vector<vector<PuzzlePiece *>> puzzle;
 
     // Storage by edge
